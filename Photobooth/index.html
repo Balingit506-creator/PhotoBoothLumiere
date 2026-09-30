@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lumière Booth — The Online Photo Booth</title>
+  <meta name="description" content="Lumière Booth is an elegant online photo booth. Snap a strip with your webcam or upload photos, choose from 23 designer templates and download a print-ready 2×6 or 4×6 keepsake. Everything stays in your browser." />
+  <meta name="theme-color" content="#f7f3ec" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231d1a17'/%3E%3Ccircle cx='32' cy='34' r='13' fill='none' stroke='%23d2ab6e' stroke-width='4'/%3E%3Crect x='20' y='14' width='12' height='6' rx='2' fill='%23d2ab6e'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Great+Vibes&family=Inter:wght@400;500;600&family=Italiana&family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,500;1,700&family=Poiret+One&family=Shrikhand&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <a class="skip" href="#booth">Skip to the booth</a>
+
+  <header class="nav" id="top">
+    <div class="nav-inner">
+      <a class="brand" href="#top" aria-label="Lumière Booth home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">Lumière<em>Booth</em></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#how">How it works</a>
+        <a href="#templates">Templates</a>
+        <a href="#faq">FAQ</a>
+        <a href="#support">Support</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle dark mode">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg>
+        </button>
+        <a class="btn btn-dark btn-sm" href="#booth">Open the booth</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">The online photo booth</p>
+        <h1>Moments,<br /><em>beautifully</em> framed.</h1>
+        <p class="lede">Strike a pose at home, at the party or across the world. Lumière Booth turns your webcam into a studio: snap a strip, dress it in a designer template, and keep a print‑ready photo strip in seconds.</p>
+        <div class="hero-cta">
+          <a class="btn btn-dark" href="#booth">Start snapping</a>
+          <a class="btn btn-ghost" href="#templates">Browse 23 templates</a>
+        </div>
+        <ul class="trust">
+          <li><strong>23</strong> designer templates</li>
+          <li><strong>300 dpi</strong> 2×6 &amp; 4×6 prints</li>
+          <li><strong>100%</strong> private, in your browser</li>
+        </ul>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <canvas class="hero-strip s1"></canvas>
+        <canvas class="hero-strip s2"></canvas>
+        <canvas class="hero-strip s3"></canvas>
+        <div class="hero-glow"></div>
+      </div>
+    </section>
+
+    <!-- HOW -->
+    <section class="section" id="how">
+      <div class="section-head">
+        <p class="eyebrow">How it works</p>
+        <h2>Four steps to a keepsake</h2>
+      </div>
+      <ol class="steps">
+        <li><span class="num">01</span><h3>Choose a layout</h3><p>A classic 3‑frame strip, a four‑frame strip, a double print, a postcard grid or a single portrait.</p></li>
+        <li><span class="num">02</span><h3>Strike a pose</h3><p>A gentle countdown, a soft flash, and the booth snaps every frame for you. Or upload from your gallery.</p></li>
+        <li><span class="num">03</span><h3>Make it yours</h3><p>Pick a template, a film look and write your own caption. Bring your own PNG overlay if you like.</p></li>
+        <li><span class="num">04</span><h3>Keep it forever</h3><p>Download a full‑resolution print file, or share it straight from your phone.</p></li>
+      </ol>
+    </section>
+
+    <!-- TEMPLATES -->
+    <section class="section" id="templates">
+      <div class="section-head split">
+        <div>
+          <p class="eyebrow">The collection</p>
+          <h2>Designed for every occasion</h2>
+          <p class="muted">Weddings, proms, birthdays and holiday soirées. Every template is drawn at print resolution, so it stays crisp on paper.</p>
+        </div>
+        <div class="chips" id="galleryChips" role="tablist" aria-label="Filter templates"></div>
+      </div>
+      <div class="gallery" id="gallery"></div>
+    </section>
+
+    <!-- BOOTH -->
+    <section class="section booth-wrap" id="booth">
+      <div class="section-head center">
+        <p class="eyebrow">The booth</p>
+        <h2>Step inside</h2>
+      </div>
+
+      <div class="booth">
+        <ol class="stepper" id="stepper">
+          <li><button type="button" data-go="1"><span>1</span> Layout</button></li>
+          <li><button type="button" data-go="2"><span>2</span> Capture</button></li>
+          <li><button type="button" data-go="3"><span>3</span> Design &amp; download</button></li>
+        </ol>
+
+        <!-- Step 1 -->
+        <div class="panel" data-step="1">
+          <p class="panel-intro">How would you like your prints?</p>
+          <div class="layouts" id="layouts"></div>
+          <div class="panel-foot">
+            <button class="btn btn-dark" type="button" data-go="2">Continue to camera</button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="panel" data-step="2" hidden>
+          <div class="capture">
+            <div class="stage-col">
+              <div class="stage" id="stage">
+                <video id="video" playsinline muted autoplay></video>
+                <div class="stage-empty" id="stageEmpty">
+                  <div class="lens" aria-hidden="true"></div>
+                  <h3>Ready when you are</h3>
+                  <p>Allow camera access to begin, or upload photos you already love.</p>
+                  <div class="row">
+                    <button class="btn btn-light" type="button" id="enableCam">Enable camera</button>
+                    <button class="btn btn-outline-light" type="button" data-upload>Upload photos</button>
+                  </div>
+                </div>
+                <div class="countdown" id="countdown" aria-live="assertive"></div>
+                <div class="flash" id="flash"></div>
+                <div class="stage-hud" id="hud" hidden>
+                  <span class="rec"></span><span id="hudText">Frame 1 of 3</span>
+                </div>
+              </div>
+
+              <div class="shoot-bar">
+                <button class="btn btn-ghost btn-sm" type="button" data-upload>
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M19 13v6H5v-6H3v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6zM11 4.8V16h2V4.8l3.6 3.6L18 7l-6-6-6 6 1.4 1.4z"/></svg>
+                  Upload
+                </button>
+                <button class="shutter" type="button" id="shutter" aria-label="Start photo session">
+                  <span></span>
+                </button>
+                <button class="btn btn-ghost btn-sm" type="button" id="flipCam" disabled>
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M20 5h-3.2L15 3H9L7.2 5H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-8 13a5 5 0 0 1-4.9-4H5l3-3 3 3H9.1A3 3 0 0 0 15 13h2a5 5 0 0 1-5 5m3-5-3-3h1.9A3 3 0 0 0 9 11H7a5 5 0 0 1 9.9-1H19z"/></svg>
+                  Flip
+                </button>
+              </div>
+            </div>
+
+            <aside class="capture-side">
+              <div class="field">
+                <span class="label">Timer</span>
+                <div class="seg" id="timerSeg">
+                  <button type="button" data-timer="3" class="on">3s</button>
+                  <button type="button" data-timer="5">5s</button>
+                  <button type="button" data-timer="10">10s</button>
+                </div>
+              </div>
+              <div class="field">
+                <span class="label">Film look</span>
+                <div class="filters" id="filterList"></div>
+              </div>
+              <div class="field toggles">
+                <label class="switch"><input type="checkbox" id="mirrorToggle" checked /><span></span>Mirror preview</label>
+                <label class="switch"><input type="checkbox" id="soundToggle" checked /><span></span>Shutter sound</label>
+              </div>
+              <div class="field">
+                <span class="label">Your frames <small id="frameCount">0 / 3</small></span>
+                <div class="tray" id="tray"></div>
+                <p class="hint">Tap a frame to retake it. Press <kbd>Space</kbd> to start.</p>
+              </div>
+              <button class="btn btn-dark btn-block" type="button" id="toDesign" data-go="3" disabled>Continue to design</button>
+            </aside>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="panel" data-step="3" hidden>
+          <div class="design">
+            <div class="preview-col">
+              <div class="preview-frame">
+                <canvas id="preview" aria-label="Photo strip preview"></canvas>
+              </div>
+            </div>
+            <aside class="design-side">
+              <div class="field">
+                <span class="label">Template</span>
+                <div class="chips small" id="designChips"></div>
+                <div class="tpl-grid" id="tplGrid"></div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="captionInput">Caption</label>
+                <input class="input" id="captionInput" type="text" maxlength="40" placeholder="Our Moments" />
+              </div>
+              <div class="field">
+                <label class="label" for="subInput">Subtitle</label>
+                <input class="input" id="subInput" type="text" maxlength="48" />
+              </div>
+              <div class="field toggles">
+                <label class="switch"><input type="checkbox" id="captionToggle" checked /><span></span>Show caption</label>
+              </div>
+
+              <div class="field">
+                <span class="label">Film look</span>
+                <div class="filters" id="filterList2"></div>
+              </div>
+
+              <details class="field overlay-box">
+                <summary class="label">Bring your own template <small>optional</small></summary>
+                <p class="hint">Upload a transparent PNG made for photo booths. It is laid over the finished strip, so pair it with <em>Blank Canvas</em> for a clean base. Best sizes: 600×1800 for strips, 1200×1800 for 4×6.</p>
+                <div class="row">
+                  <label class="btn btn-ghost btn-sm file-btn">Choose PNG<input type="file" id="overlayInput" accept="image/png,image/webp" hidden /></label>
+                  <button class="btn btn-link btn-sm" type="button" id="overlayClear" hidden>Remove</button>
+                </div>
+                <p class="hint" id="overlayName"></p>
+              </details>
+
+              <div class="download">
+                <button class="btn btn-dark btn-block" type="button" id="downloadBtn">
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M19 12v7H5v-7H3v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7zm-6 .7 2.6-2.6L17 11.5l-5 5-5-5 1.4-1.4 2.6 2.6V3h2z"/></svg>
+                  Download print file
+                </button>
+                <div class="row">
+                  <button class="btn btn-ghost btn-sm" type="button" id="shareBtn" hidden>Share</button>
+                  <button class="btn btn-ghost btn-sm" type="button" data-go="2">Retake photos</button>
+                  <button class="btn btn-link btn-sm" type="button" id="startOver">Start over</button>
+                </div>
+                <p class="hint" id="printInfo"></p>
+                <p class="hint tip-nudge" id="tipNudge" hidden>Love your strip? <a href="#support">Buy the booth a coffee</a> ☕</p>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" multiple hidden />
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section features">
+      <div class="feature">
+        <h3>Private by design</h3>
+        <p>Your camera feed and photos never leave your device. There are no uploads, no accounts and no servers involved.</p>
+      </div>
+      <div class="feature">
+        <h3>Print‑perfect</h3>
+        <p>Strips export at 600×1800 (2×6 in) and prints at 1200×1800 (4×6 in), both at 300 dpi, ready for any photo lab.</p>
+      </div>
+      <div class="feature">
+        <h3>Film looks</h3>
+        <p>Eight hand‑tuned looks, from luminous Natural to moody Noir, applied the same way on screen and on paper.</p>
+      </div>
+      <div class="feature">
+        <h3>Your own artwork</h3>
+        <p>Designed a template for your event? Drop in a transparent PNG and the booth frames every strip with it.</p>
+      </div>
+    </section>
+
+    <!-- SUPPORT -->
+    <section class="section" id="support">
+      <div class="support">
+        <div class="support-copy">
+          <p class="eyebrow">Support the booth</p>
+          <h2>Keep the flash <em>firing</em></h2>
+          <p class="muted">Lumière Booth is free, has no ads and never asks for your photos. If it made your day a little brighter, a small tip keeps it running and pays for new templates.</p>
+          <ul class="support-perks">
+            <li>New seasonal templates every few months</li>
+            <li>No ads, no watermarks, no sign‑ups, ever</li>
+            <li>Hosting and upkeep paid for by people like you</li>
+          </ul>
+        </div>
+
+        <div class="support-card">
+          <span class="label">Choose an amount</span>
+          <div class="tiers" id="tiers" role="radiogroup" aria-label="Donation amount">
+            <button type="button" class="tier" role="radio" data-amount="3">
+              <span class="tier-icon" aria-hidden="true">☕</span>
+              <span class="tier-amt">$3</span>
+              <span class="tier-name">A coffee</span>
+            </button>
+            <button type="button" class="tier on" role="radio" data-amount="5">
+              <span class="tier-icon" aria-hidden="true">🎞️</span>
+              <span class="tier-amt">$5</span>
+              <span class="tier-name">A roll of film</span>
+            </button>
+            <button type="button" class="tier" role="radio" data-amount="10">
+              <span class="tier-icon" aria-hidden="true">🥂</span>
+              <span class="tier-amt">$10</span>
+              <span class="tier-name">A toast</span>
+            </button>
+            <label class="tier tier-custom">
+              <span class="tier-amt"><span>$</span><input type="number" id="customAmount" min="1" max="999" step="1" placeholder="Other" inputmode="numeric" aria-label="Custom amount in dollars" /></span>
+              <span class="tier-name">Your choice</span>
+            </label>
+          </div>
+
+          <a class="btn btn-dark btn-block" id="donatePrimary" href="#" target="_blank" rel="noopener">Donate $5</a>
+          <div class="donate-divider"><span>or support on</span></div>
+          <div class="donate-links" id="donateLinks"></div>
+          <p class="hint center">Payments are handled securely by the platform you choose. Lumière Booth never sees your card details.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section faq" id="faq">
+      <div class="section-head center">
+        <p class="eyebrow">Questions</p>
+        <h2>Good to know</h2>
+      </div>
+      <details><summary>Do I need to install anything?</summary><p>No. Lumière Booth runs in any modern browser on laptops, tablets and phones. Just allow camera access when asked.</p></details>
+      <details><summary>Are my photos stored anywhere?</summary><p>No. Everything happens inside this page. Close the tab and your photos are gone unless you downloaded them.</p></details>
+      <details><summary>Can I use photos from my phone's gallery?</summary><p>Yes. Choose <em>Upload</em> in the capture step and pick as many photos as your layout needs.</p></details>
+      <details><summary>How do I print my strip?</summary><p>Download the print file and send it to any photo lab. Strips are 2×6 in; the double strip prints as one 4×6 and is cut down the middle into two strips.</p></details>
+      <details><summary>Can I use a template I bought or downloaded elsewhere?</summary><p>Yes. If you have a licence to use it, export it as a transparent PNG and add it under <em>Bring your own template</em> in the design step.</p></details>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Lumière<em>Booth</em></span></a>
+      <p class="muted">Made for moments that matter.</p>
+      <p class="muted small">© <span id="year"></span> Lumière Booth</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/templates.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/donate.js"></script>
+</body>
+</html>
