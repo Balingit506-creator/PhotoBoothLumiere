@@ -9,7 +9,7 @@
  * (it already carries your tag).
  */
 export const AFFILIATE = {
-  amazonTag: '',
+  amazonTag: 'jbzrecommends-20',
   amazonDomain: 'amazon.com',
 };
 
