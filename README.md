@@ -27,8 +27,6 @@ npm run preview   # serve the build
 | `src/lib/media.js` | Image loading, shutter sounds, file naming |
 | `src/styles.css` | Design tokens (light and dark), layout, responsive rules |
 
-The original vanilla-JS version is kept in `legacy/` for reference.
-
 ## Donations
 
 Open `src/donate.config.js` and fill in the `DONATE` block at the top with your PayPal.Me name, Ko-fi, Buy Me a Coffee or GitHub Sponsors username, or a Stripe Payment Link. Only the platforms you fill in are shown. PayPal also receives the amount the visitor picked. Until something is filled in, the buttons show a "coming soon" message.
