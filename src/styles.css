@@ -249,12 +249,17 @@ p { margin: 0; }
 /* capture */
 .capture { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; }
 .stage {
-  position: relative; aspect-ratio: 4 / 3; background: var(--stage); border-radius: 22px; overflow: hidden;
+  position: relative; display: grid;
+  background: var(--stage); border-radius: 22px; overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04);
 }
-.stage video { width: 100%; height: 100%; object-fit: cover; }
+/* 4:3 by default, taller when the empty-state copy needs the room (narrow phones):
+   the spacer and the copy share one grid cell, which fits the taller of the two. */
+.stage::before { content: ""; grid-area: 1 / 1; padding-top: 75%; }
+.stage-empty { grid-area: 1 / 1; }
+.stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .stage-empty {
-  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; padding: 24px; color: #efe7da; gap: 10px;
   background: radial-gradient(ellipse at 50% 35%, #2a241d, #110f0d 70%);
 }
@@ -506,7 +511,9 @@ kbd { font: 500 .72rem var(--sans); border: 1px solid var(--line); border-bottom
   .layout-art { height: 160px; }
   .filters { grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .stage { border-radius: 16px; }
+  .stage-empty { padding: 20px 16px; }
   .stage-empty h3 { font-size: 1.5rem; }
+  .lens { width: 56px; height: 56px; margin-bottom: 4px; }
   .preview-frame { padding: 16px; min-height: 0; }
   .footer-inner .small { margin-left: 0; }
 }
