@@ -1,3 +1,4 @@
+import { TEMPLATE_LIST } from '../lib/booth.js';
 import { useArt } from '../context.js';
 import { today } from '../lib/media.js';
 import StripCanvas from './StripCanvas.jsx';
@@ -18,10 +19,10 @@ export default function Hero() {
         <p className="lede">Strike a pose at home, at the party or across the world. Lumière Booth turns your webcam into a studio: snap a strip, dress it in a designer template, and keep a print‑ready photo strip in seconds.</p>
         <div className="hero-cta">
           <a className="btn btn-dark" href="#booth">Start snapping</a>
-          <a className="btn btn-ghost" href="#templates">Browse 23 templates</a>
+          <a className="btn btn-ghost" href="#templates">Browse {TEMPLATE_LIST.length} templates</a>
         </div>
         <ul className="trust">
-          <li><strong>23</strong> designer templates</li>
+          <li><strong>{TEMPLATE_LIST.length}</strong> designer templates</li>
           <li><strong>300 dpi</strong> 2×6 &amp; 4×6 prints</li>
           <li><strong>100%</strong> private, in your browser</li>
         </ul>

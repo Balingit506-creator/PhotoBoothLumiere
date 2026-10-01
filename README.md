@@ -1,6 +1,6 @@
 # Lumière Booth
 
-An elegant online photo booth. Snap a strip with your webcam or upload photos, pick one of 23 templates, add a caption and a film look, then download a 300 dpi print file.
+An elegant online photo booth. Snap a strip with your webcam or upload photos, pick one of 30 templates, add a caption and a film look, then download a 300 dpi print file.
 
 ## Run it
 
@@ -22,7 +22,7 @@ npm run preview   # serve the build
 | `src/components/CaptureStep.jsx`, `DesignStep.jsx` | Capture and design panels |
 | `src/components/StripCanvas.jsx` | A canvas drawn by the strip renderer; redraws only when its options change |
 | `src/components/*.jsx` | Nav, hero, gallery, features, support, FAQ, footer |
-| `src/lib/booth.js` | Layouts, the 23 procedurally drawn templates, and the canvas renderer |
+| `src/lib/booth.js` | Layouts, the 30 procedurally drawn templates, and the canvas renderer |
 | `src/lib/looks.js` | Eight film looks (CSS filter on the live preview, the same filter baked into captures) |
 | `src/lib/media.js` | Image loading, shutter sounds, file naming |
 | `src/styles.css` | Design tokens (light and dark), layout, responsive rules |

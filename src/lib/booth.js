@@ -483,6 +483,145 @@ function flake(ctx, x, y, r, R) {
   ctx.closePath(); ctx.fill();
 }
 
+function bat(ctx, x, y, s, rot) {
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(rot || 0); ctx.scale(s, s);
+  // Each piece is filled on its own so overlapping windings never punch holes.
+  for (const d of [1, -1]) {
+    ctx.beginPath();
+    ctx.moveTo(0, -0.2);
+    ctx.quadraticCurveTo(d * 0.35, -0.62, d, -0.34);
+    ctx.quadraticCurveTo(d * 0.82, -0.12, d * 0.88, 0.12);
+    ctx.quadraticCurveTo(d * 0.68, 0, d * 0.58, 0.2);
+    ctx.quadraticCurveTo(d * 0.44, 0.04, d * 0.3, 0.24);
+    ctx.quadraticCurveTo(d * 0.14, 0.06, 0, 0.3);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(d * 0.11, -0.16); ctx.lineTo(d * 0.07, -0.36); ctx.lineTo(d * 0.02, -0.2); ctx.closePath(); ctx.fill();
+  }
+  ctx.beginPath(); ctx.ellipse(0, 0.02, 0.13, 0.26, 0, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+
+function pumpkin(ctx, x, y, r) {
+  ctx.save();
+  ctx.translate(x, y);
+  [[-0.5, 0.5], [0.5, 0.5], [-0.25, 0.55], [0.25, 0.55], [0, 0.5]].forEach(([dx, rx]) => {
+    const g = ctx.createRadialGradient(dx * r - r * 0.15, -r * 0.25, r * 0.05, dx * r, 0, r * 0.9);
+    g.addColorStop(0, '#ffb35c'); g.addColorStop(1, '#d9590f');
+    ctx.beginPath(); ctx.ellipse(dx * r, 0, rx * r, r * 0.78, 0, 0, TAU);
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = 'rgba(120,40,0,.35)'; ctx.lineWidth = r * 0.03; ctx.stroke();
+  });
+  ctx.fillStyle = '#4d5a24';
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.08, -r * 0.68);
+  ctx.quadraticCurveTo(-r * 0.02, -r * 1.02, r * 0.18, -r * 1.06);
+  ctx.lineTo(r * 0.16, -r * 0.96);
+  ctx.quadraticCurveTo(r * 0.07, -r * 0.88, r * 0.1, -r * 0.68);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+// A quarter spider web in a corner; sx/sy flip it into the other corners.
+function web(ctx, x, y, r, k, color, sx = 1, sy = 1) {
+  ctx.save();
+  ctx.translate(x, y); ctx.scale(sx, sy);
+  ctx.strokeStyle = color; ctx.lineWidth = 1.1 * k;
+  const n = 6, A = (i) => (i / (n - 1)) * (Math.PI / 2);
+  for (let i = 0; i < n; i++) {
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(A(i)) * r, Math.sin(A(i)) * r); ctx.stroke();
+  }
+  for (let j = 1; j <= 4; j++) {
+    const rr = (r * j) / 4.4;
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const px = Math.cos(A(i)) * rr, py = Math.sin(A(i)) * rr;
+      if (!i) { ctx.moveTo(px, py); continue; }
+      const am = (A(i) + A(i - 1)) / 2;
+      ctx.quadraticCurveTo(Math.cos(am) * rr * 0.82, Math.sin(am) * rr * 0.82, px, py);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function firework(ctx, x, y, r, color, R, k) {
+  ctx.save();
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineCap = 'round';
+  const n = 26;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * TAU + R() * 0.1, r0 = r * (0.18 + R() * 0.12), r1 = r * (0.75 + R() * 0.25);
+    const ca = Math.cos(a), sa = Math.sin(a);
+    ctx.globalAlpha = 0.55 + R() * 0.45; ctx.lineWidth = (1 + R() * 1.4) * k;
+    ctx.beginPath(); ctx.moveTo(x + ca * r0, y + sa * r0); ctx.lineTo(x + ca * r1, y + sa * r1); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x + ca * (r1 + 5 * k), y + sa * (r1 + 5 * k), 1.6 * k, 0, TAU); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function cloud(ctx, x, y, s, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  [[-0.55, 0.1, 0.32], [-0.2, -0.12, 0.42], [0.25, -0.05, 0.36], [0.58, 0.12, 0.26]].forEach(([dx, dy, r]) => {
+    ctx.moveTo(x + dx * s + r * s, y + dy * s);
+    ctx.arc(x + dx * s, y + dy * s, r * s, 0, TAU);
+  });
+  ctx.moveTo(x + 0.85 * s, y + 0.2 * s);
+  ctx.ellipse(x, y + 0.2 * s, 0.85 * s, 0.2 * s, 0, 0, TAU);
+  ctx.fill();
+}
+
+// Right half of a maple leaf in unit coordinates; the left half mirrors it.
+const MAPLE = [[0, -1], [0.14, -0.6], [0.36, -0.72], [0.3, -0.36], [0.78, -0.5], [0.64, -0.18], [0.92, 0.02], [0.46, 0.14], [0.54, 0.4], [0.1, 0.3], [0.04, 0.36]];
+function mapleLeaf(ctx, x, y, s, rot, color) {
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  ctx.beginPath();
+  MAPLE.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)));
+  for (let i = MAPLE.length - 1; i >= 0; i--) ctx.lineTo(-MAPLE[i][0], MAPLE[i][1]);
+  ctx.closePath();
+  ctx.fillStyle = color; ctx.fill();
+  ctx.strokeStyle = mix(color, '#000000', 0.25); ctx.lineWidth = 0.035; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, 0.85); ctx.lineTo(0, -0.7);
+  ctx.moveTo(0, 0.1); ctx.lineTo(0.6, -0.35); ctx.moveTo(0, 0.1); ctx.lineTo(-0.6, -0.35);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function pampas(ctx, x, y, len, ang, color, R, k) {
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(ang); ctx.lineCap = 'round';
+  ctx.strokeStyle = mix(color, '#000000', 0.25); ctx.lineWidth = 1.6 * k;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(len * 0.5, len * 0.05, len, 0); ctx.stroke();
+  ctx.strokeStyle = color; ctx.lineWidth = 1.1 * k;
+  for (let i = 0; i < 80; i++) {
+    const t = 0.35 + R() * 0.65, px = len * t, py = 2 * (1 - t) * t * len * 0.05;
+    const plume = Math.sin((Math.PI * (t - 0.35)) / 0.65) * len * 0.13 + 4 * k;
+    const l = plume * (0.5 + R() * 0.5), side = R() < 0.5 ? -1 : 1;
+    ctx.globalAlpha = 0.35 + R() * 0.5;
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + l * 0.55, py + side * l); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function blossomBranch(ctx, x, y, len, ang, R, k, petal, center) {
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(ang);
+  ctx.strokeStyle = '#5a3a2e'; ctx.lineCap = 'round';
+  ctx.lineWidth = 7 * k;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(len * 0.5, len * 0.12, len, len * 0.04); ctx.stroke();
+  const pts = [[len, len * 0.04], [len * 0.62, len * 0.1]];
+  for (let i = 0; i < 4; i++) {
+    const t = 0.25 + i * 0.18, bx = len * t, by = 2 * (1 - t) * t * len * 0.12 + t * t * len * 0.04;
+    const side = i % 2 ? 1 : -1, tl = len * (0.28 - i * 0.04), ex = bx + tl * 0.7, ey = by + side * tl * 0.7;
+    ctx.lineWidth = 3.5 * k * (1 - i * 0.15);
+    ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(bx + tl * 0.4, by + side * tl * 0.2, ex, ey); ctx.stroke();
+    pts.push([ex, ey], [(bx + ex) / 2 + side * 4 * k, (by + ey) / 2]);
+  }
+  pts.forEach(([px, py]) => flower(ctx, px, py, (13 + R() * 9) * k, 5, petal, center, R() * TAU));
+  ctx.restore();
+}
+
 /* -------------------------------------------------------------- layouts */
 
 function strip(n, photoH, gap, top) {
@@ -1033,6 +1172,194 @@ add({
     title: { family: 'Caveat', weight: 600, size: 66, color: '#3a3531' },
     sub: { family: 'Caveat', weight: 600, size: 30, color: '#7a716a' },
   },
+});
+
+add({
+  id: 'halloween', name: 'Spooky Night', cats: ['seasonal', 'party'], caption: 'Happy Halloween',
+  bg(ctx, L, R) {
+    vGrad(ctx, L, '#140a24', '#3a1450');
+    ctx.fillStyle = '#ffffff';
+    for (let i = 0; i < 90 * L.k; i++) {
+      ctx.globalAlpha = 0.15 + R() * 0.6;
+      ctx.beginPath(); ctx.arc(R() * L.w, R() * L.h, (0.4 + R() * 1.2) * L.k, 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  },
+  photo: { border: 3, borderColor: '#ff8a1f', glow: 'rgba(255,138,31,.5)' },
+  deco(ctx, L) {
+    const { w, h, k, F } = L;
+    web(ctx, 0, 0, 150 * k, k, 'rgba(235,225,255,.6)');
+    web(ctx, w, 0, 100 * k, k, 'rgba(235,225,255,.45)', -1, 1);
+    const mr = Math.min(34 * k, F.h * 0.08), mx = w - 72 * k, my = F.y + F.h * 0.16;
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,236,180,.7)'; ctx.shadowBlur = 24 * k;
+    ctx.fillStyle = '#f8e9bd'; ctx.beginPath(); ctx.arc(mx, my, mr, 0, TAU); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#0b0612';
+    bat(ctx, mx - mr * 0.5, my + mr * 0.15, 30 * k, -0.2);
+    bat(ctx, 72 * k, F.y + F.h * 0.13, 26 * k, 0.25);
+    bat(ctx, 140 * k, F.y + F.h * 0.06, 17 * k, -0.15);
+    const pr = Math.min(56 * k, F.h * 0.12);
+    pumpkin(ctx, 62 * k, h - pr * 0.95, pr);
+    pumpkin(ctx, 62 * k + pr * 1.3, h - pr * 0.62, pr * 0.62);
+    pumpkin(ctx, w - 60 * k, h - pr * 0.85, pr * 0.85);
+  },
+  text: {
+    ty: 0.44, sy: 0.62, maxW: 0.7,
+    title: { family: 'Shrikhand', weight: 400, size: 46, color: '#ff8a1f', glow: 'rgba(255,120,20,.45)' },
+    sub: caps({ weight: 600, spacing: 7, color: '#d9c7f0' }),
+  },
+});
+
+add({
+  id: 'newyear', name: "New Year's Eve", cats: ['seasonal', 'party'], caption: 'Happy New Year',
+  bg(ctx, L, R) {
+    vGrad(ctx, L, '#06070d', '#141a30');
+    // Behind the photos only, so the caption area stays clean.
+    for (let i = 0; i < 8; i++) firework(ctx, R() * L.w, R() * L.F.y, (50 + R() * 50) * L.k, 'rgba(241,217,139,.35)', R, L.k);
+  },
+  photo: { border: 2, borderColor: '#d4af37' },
+  deco(ctx, L, R) {
+    const { w, h, k, F } = L;
+    const r = Math.min(70 * k, F.h * 0.16);
+    firework(ctx, w * 0.2, F.y + F.h * 0.2, r, '#f1d98b', R, k);
+    firework(ctx, w * 0.82, F.y + F.h * 0.15, r * 0.75, '#fff2c4', R, k);
+    firework(ctx, w * 0.62, F.y + F.h * 0.08, r * 0.45, '#d4af37', R, k);
+    glitter(ctx, R, 700, { x: 0, y: h, w, h: -Math.min(150 * k, F.h * 0.2) }, GOLDS, k, 2.4);
+  },
+  text: {
+    ty: 0.5, sy: 0.66,
+    title: { family: 'Montserrat', weight: 300, size: 42, spacing: 8, upper: true, gold: true },
+    sub: caps({ spacing: 8, color: '#d9c38c' }),
+  },
+});
+
+add({
+  id: 'babyshower', name: 'Little Star', cats: ['celebration'], caption: 'Oh Baby',
+  bg(ctx, L, R) {
+    vGrad(ctx, L, '#e8f2fb', '#fbe9f0');
+    for (let i = 0; i < 9; i++) cloud(ctx, R() * L.w, R() * L.h, (50 + R() * 50) * L.k, 'rgba(255,255,255,.55)');
+  },
+  photo: { radius: 18, border: 6, borderColor: '#ffffff' },
+  deco(ctx, L, R) {
+    const { w, h, k, F } = L;
+    cloud(ctx, 58 * k, h - 40 * k, 70 * k, '#ffffff');
+    cloud(ctx, w - 50 * k, h - 64 * k, 56 * k, '#ffffff');
+    ctx.fillStyle = '#f2c36b';
+    for (let i = 0; i < 9; i++) sparkle(ctx, w * (0.08 + R() * 0.84), F.y + F.h * (0.03 + R() * 0.09), (5 + R() * 7) * k);
+    [[30, 30], [w / k - 30, 30]].forEach(([x, y]) => sparkle(ctx, x * k, y * k, 13 * k));
+  },
+  text: { ty: 0.42, sy: 0.6, title: script({ color: '#5b7fa6' }), sub: caps({ weight: 600, color: '#c28aa0' }) },
+});
+
+add({
+  id: 'autumn', name: 'Autumn Harvest', cats: ['seasonal'], caption: 'Hello Autumn',
+  bg(ctx, L, R) {
+    const { w, h, k } = L;
+    fill(ctx, L, '#f9f1e4');
+    watercolor(ctx, 0, 0, 170 * k, '#e8b07a', R);
+    watercolor(ctx, w, h, 200 * k, '#e3a066', R);
+  },
+  photo: { border: 5, borderColor: '#fffaf2' },
+  deco(ctx, L, R) {
+    const { w, h, k, F } = L;
+    const cols = ['#c2410c', '#d97706', '#b45309', '#9a3412', '#ca8a04'];
+    const corner = (cx, cy, base) => {
+      for (let i = 0; i < 9; i++) {
+        const a = base + (R() - 0.5) * 1.3, d = (10 + R() * 70) * k;
+        mapleLeaf(ctx, cx + Math.cos(a) * d, cy + Math.sin(a) * d, (24 + R() * 18) * k, R() * TAU, cols[i % cols.length]);
+      }
+    };
+    corner(0, 0, 0.78);
+    corner(w, h, -Math.PI + 0.78);
+    for (let i = 0; i < 6; i++) {
+      mapleLeaf(ctx, w * (0.1 + R() * 0.8), F.y + F.h * (0.04 + R() * 0.14), (9 + R() * 7) * k, R() * TAU, cols[(R() * cols.length) | 0]);
+    }
+  },
+  text: {
+    ty: 0.44, sy: 0.62,
+    title: { family: 'Playfair Display', weight: 700, style: 'italic', size: 54, color: '#8a3412' },
+    sub: caps({ weight: 600, color: '#b45f1e' }),
+  },
+});
+
+add({
+  id: 'seaside', name: 'Seaside', cats: ['summer'], caption: 'Beach Days',
+  bg(ctx, L) { vGrad(ctx, L, '#f2fafb', '#cdebf0'); },
+  photo: { radius: 4, border: 6, borderColor: '#ffffff' },
+  deco(ctx, L) {
+    const { w, h, k, F } = L;
+    const top = h - Math.min(F.h * 0.3, 150 * k);
+    ['#9fdbe5', '#5fbfd1', '#2b9bb3', '#16758c'].forEach((c, i) => {
+      const y0 = top + (i * (h - top)) / 4.2, amp = 7 * k, len = 130 * k;
+      ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, y0);
+      for (let x = 0; x <= w + 4 * k; x += 4 * k) ctx.lineTo(x, y0 + Math.sin((x / len) * TAU + i * 1.3) * amp);
+      ctx.lineTo(w, h); ctx.closePath();
+      ctx.fillStyle = c; ctx.fill();
+    });
+    const sr = Math.min(26 * k, F.h * 0.07), sx = w - 70 * k, sy = F.y + F.h * 0.14;
+    ctx.fillStyle = '#ffd27a'; ctx.beginPath(); ctx.arc(sx, sy, sr, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#2b5f6e'; ctx.lineWidth = 2 * k; ctx.lineCap = 'round';
+    [[sx - sr * 2.6, sy - sr * 0.5, 1], [sx - sr * 1.7, sy - sr * 1.1, 0.7], [70 * k, F.y + F.h * 0.1, 0.9]].forEach(([x, y, s]) => {
+      const u = 12 * k * s;
+      ctx.beginPath();
+      ctx.moveTo(x - u, y); ctx.quadraticCurveTo(x - u / 2, y - u * 0.6, x, y);
+      ctx.quadraticCurveTo(x + u / 2, y - u * 0.6, x + u, y);
+      ctx.stroke();
+    });
+  },
+  text: {
+    ty: 0.38, sy: 0.54,
+    title: { family: 'Playfair Display', weight: 700, style: 'italic', size: 56, color: '#0f4c5c' },
+    sub: caps({ weight: 600, color: '#2a8a9e' }),
+  },
+});
+
+add({
+  id: 'boho', name: 'Boho Terracotta', cats: ['wedding', 'celebration'], caption: 'Love & Adventure',
+  bg(ctx, L, R) {
+    const { w, h, k } = L;
+    fill(ctx, L, '#f6ede3');
+    watercolor(ctx, w, 0, 150 * k, '#e7c9ab', R, 6, 0.08);
+    watercolor(ctx, 0, h, 170 * k, '#e7c9ab', R, 6, 0.08);
+  },
+  photo: { radius: 8, border: 5, borderColor: '#fffaf4' },
+  deco(ctx, L, R) {
+    const { w, h, k } = L;
+    [2.0, 2.35, 2.7].forEach((a, i) => pampas(ctx, w + 5 * k, -5 * k, (170 + i * 20) * k, a, i % 2 ? '#d4b48c' : '#e6d3b3', R, k));
+    leaf(ctx, w + 5 * k, -5 * k, 120 * k, 14 * k, 2.15, '#a08a5c');
+    [-0.6, -0.95, -1.25].forEach((a, i) => pampas(ctx, -5 * k, h + 5 * k, (150 + i * 20) * k, a, i % 2 ? '#e6d3b3' : '#d4b48c', R, k));
+    [[74, '#c46a45'], [56, '#e09a6e'], [38, '#f0c9a4']].forEach(([r, c]) => {
+      ctx.beginPath(); ctx.arc(w - 70 * k, h, r * k, Math.PI, TAU); ctx.closePath();
+      ctx.fillStyle = c; ctx.fill();
+    });
+  },
+  text: { ty: 0.42, sy: 0.6, title: serifTitle({ color: '#8a4b2f' }), sub: caps({ color: '#b07a5a' }) },
+});
+
+add({
+  id: 'blossom', name: 'Cherry Blossom', cats: ['seasonal', 'wedding'], caption: 'In Full Bloom',
+  bg(ctx, L, R) {
+    const { w, h, k } = L;
+    fill(ctx, L, '#fff8f8');
+    watercolor(ctx, 0, 0, 170 * k, '#f6c6d3', R);
+    watercolor(ctx, w, h, 190 * k, '#f3b8c8', R);
+  },
+  photo: { radius: 6, border: 5, borderColor: '#ffffff' },
+  deco(ctx, L, R) {
+    const { w, h, k, F } = L, petal = '#f6b3c6', center = '#d6476f';
+    blossomBranch(ctx, -5 * k, 12 * k, 190 * k, 0.12, R, k, petal, center);
+    blossomBranch(ctx, w + 5 * k, h - 14 * k, 180 * k, Math.PI + 0.18, R, k, petal, center);
+    ctx.fillStyle = petal;
+    for (let i = 0; i < 12; i++) {
+      ctx.globalAlpha = 0.5 + R() * 0.5;
+      ctx.beginPath();
+      ctx.ellipse(w * (0.06 + R() * 0.88), F.y + F.h * (0.04 + R() * 0.2), (4 + R() * 3) * k, (2.5 + R() * 2) * k, R() * TAU, 0, TAU);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  },
+  text: { ty: 0.42, sy: 0.6, title: script({ color: '#b8476b' }), sub: caps({ color: '#c27a91' }) },
 });
 
 add({
