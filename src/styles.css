@@ -384,6 +384,23 @@ kbd { font: 500 .72rem var(--sans); border: 1px solid var(--line); border-bottom
 .feature h3 { margin-bottom: 10px; }
 .feature p { color: var(--muted); font-size: .92rem; }
 
+/* ---------- recommended gear ---------- */
+.gear { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.gear-card {
+  display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 28px 26px 26px; transition: border-color .2s, transform .2s, box-shadow .2s;
+}
+.gear-card:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: var(--shadow); }
+.gear-icon {
+  display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 22px;
+  border-radius: 14px; background: var(--gold-soft); font-size: 1.4rem;
+}
+.gear-card h3 { margin-bottom: 8px; }
+.gear-card p { color: var(--muted); font-size: .92rem; flex: 1; }
+.gear-link { margin-top: 18px; font-size: .85rem; font-weight: 500; color: var(--gold); }
+.gear-note { margin-top: 24px; }
+
 /* ---------- support ---------- */
 .support {
   display: grid; grid-template-columns: 1fr 460px; gap: clamp(32px, 6vw, 80px); align-items: center;
@@ -471,6 +488,7 @@ kbd { font: 500 .72rem var(--sans); border: 1px solid var(--line); border-bottom
   .nav-links { display: none; }
   .nav-actions { margin-left: auto; }
   .capture, .design, .support { grid-template-columns: 1fr; }
+  .gear { grid-template-columns: repeat(2, 1fr); }
   .preview-col { position: static; }
   #preview { height: min(64vh, 640px); }
   .tpl-grid { max-height: none; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
@@ -480,7 +498,7 @@ kbd { font: 500 .72rem var(--sans); border: 1px solid var(--line); border-bottom
   .nav-actions .btn { display: none; }
   .hero, .section { padding-left: 16px; padding-right: 16px; }
   .hero-art { height: 380px; }
-  .steps, .features { grid-template-columns: 1fr; }
+  .steps, .features, .gear { grid-template-columns: 1fr; }
   .gallery { grid-template-columns: repeat(2, 1fr); gap: 24px 14px; }
   .booth { border-radius: 24px; padding: 14px; }
   .stepper button { padding: 6px 12px 6px 6px; font-size: .8rem; }

@@ -31,6 +31,10 @@ npm run preview   # serve the build
 
 Open `src/donate.config.js` and fill in the `DONATE` block at the top with your PayPal.Me name, Ko-fi, Buy Me a Coffee or GitHub Sponsors username, or a Stripe Payment Link. Only the platforms you fill in are shown. PayPal also receives the amount the visitor picked. Until something is filled in, the buttons show a "coming soon" message.
 
+## Affiliate links
+
+The "Bring the booth home" section lists recommended gear. Open `src/affiliate.config.js` and set `amazonTag` to your Amazon Associates tracking ID (and `amazonDomain` if you joined another store). Each item links to an Amazon search; give it a `url` to link an exact product instead.
+
 ## Layouts
 
 | Layout | Output |

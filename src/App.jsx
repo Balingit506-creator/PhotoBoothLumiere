@@ -8,6 +8,7 @@ import HowItWorks from './components/HowItWorks.jsx';
 import Gallery from './components/Gallery.jsx';
 import Booth from './components/Booth.jsx';
 import Features from './components/Features.jsx';
+import Gear from './components/Gear.jsx';
 import Support from './components/Support.jsx';
 import Faq from './components/Faq.jsx';
 import Footer from './components/Footer.jsx';
@@ -58,6 +59,7 @@ export default function App() {
           <Gallery onUse={pickTemplate} />
           <Booth template={template} setTemplate={setTemplate} tipNudge={tipNudge} onDownloaded={() => setTipNudge(true)} />
           <Features />
+          <Gear />
           <Support />
           <Faq />
         </main>
