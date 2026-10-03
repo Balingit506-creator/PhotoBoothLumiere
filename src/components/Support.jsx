@@ -41,10 +41,10 @@ export default function Support() {
         <div className="support-copy">
           <p className="eyebrow">Support the booth</p>
           <h2>Keep the flash <em>firing</em></h2>
-          <p className="muted">Lumière Booth is free, has no ads and never asks for your photos. If it made your day a little brighter, a small tip keeps it running and pays for new templates.</p>
+          <p className="muted">Lumière Booth is free and never asks for your photos. If it made your day a little brighter, a small tip keeps it running, pays for new templates and keeps ads to a minimum.</p>
           <ul className="support-perks">
             <li>New seasonal templates every few months</li>
-            <li>No ads, no watermarks, no sign‑ups, ever</li>
+            <li>No watermarks, no sign‑ups, ever</li>
             <li>Hosting and upkeep paid for by people like you</li>
           </ul>
         </div>

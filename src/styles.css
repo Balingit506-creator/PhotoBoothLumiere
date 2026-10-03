@@ -389,6 +389,10 @@ kbd { font: 500 .72rem var(--sans); border: 1px solid var(--line); border-bottom
 .feature h3 { margin-bottom: 10px; }
 .feature p { color: var(--muted); font-size: .92rem; }
 
+/* ---------- ad slot ---------- */
+.ad-slot { color: var(--ink-2); }
+.ad-label { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 12px; }
+
 /* ---------- recommended gear ---------- */
 .gear { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .gear-card {
