@@ -11,7 +11,7 @@
  */
 export const DONATE = {
   currency: 'USD',
-  paypal: '',
+  paypal: 'JuarenBalingit',
   kofi: '',
   buymeacoffee: '',
   github: '',
