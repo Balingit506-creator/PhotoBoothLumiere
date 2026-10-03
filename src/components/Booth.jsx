@@ -1,7 +1,8 @@
 /* Lumière Booth — the 3-step booth: layout, capture, design & download. */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LAYOUTS, TEMPLATES, render } from '../lib/booth.js';
-import { beep, fileName, loadImage, lookOf, replay, shutterSound, sleep, toCanvas, today } from '../lib/media.js';
+import { beep, bufferToCanvas, canvasToBuffer, fileName, loadImage, lookOf, replay, shutterSound, sideBySide, sleep, toCanvas, today } from '../lib/media.js';
+import { roomFromHash, useTogether } from '../lib/useTogether.js';
 import { useArt, useToast } from '../context.js';
 import StripCanvas from './StripCanvas.jsx';
 import CaptureStep from './CaptureStep.jsx';
@@ -53,6 +54,17 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
   const latest = useRef();
   latest.current = { timer, sound, mirror, facing, layout };
 
+  // Shoot together: the host runs the session; both sides snap their own camera and swap shots.
+  const [joinRoom, setJoinRoom] = useState(roomFromHash);
+  const [remoteMirror, setRemoteMirror] = useState(true);
+  const together = useTogether(onTogetherMessage);
+  const tgRef = useRef(together);
+  tgRef.current = together;
+  const halvesRef = useRef({}); // frame index -> { me, them, host, timer }
+  const autoNextRef = useRef(false);
+  const duo = () => tgRef.current.status === 'connected';
+  const isGuest = () => duo() && tgRef.current.role === 'guest';
+
   function updatePhotos(fn) {
     photosRef.current = fn(photosRef.current);
     setPhotosState(photosRef.current);
@@ -65,15 +77,33 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
     stepRef.current = n;
     setStep(n);
     if (n === 2 && wantCameraRef.current && !streamRef.current) startCamera();
-    if (n === 3) stopCamera(true);
+    // Keep the camera on while shooting together so the friend still sees you.
+    if (n === 3 && tgRef.current.status === 'off') stopCamera(true);
     const el = document.getElementById('booth');
     const top = el.getBoundingClientRect().top;
     if (top < -40 || top > window.innerHeight * 0.5) el.scrollIntoView({ behavior: 'smooth' });
   }
 
-  function setLayout(id) {
+  function applyLayout(id) {
     setLayoutId(id);
+    latest.current.layout = id;
+    halvesRef.current = {};
     updatePhotos((p) => resize(p, LAYOUTS[id].count));
+  }
+
+  function setLayout(id) {
+    applyLayout(id);
+    tgRef.current.send({ t: 'layout', id });
+  }
+
+  function setTimerShared(n) {
+    setTimer(n);
+    tgRef.current.send({ t: 'timer', n });
+  }
+
+  function setMirrorShared(on) {
+    setMirror(on);
+    tgRef.current.send({ t: 'mirror', on: on && latest.current.facing === 'user' });
   }
 
   /* ------------------------------------------------------------ camera */
@@ -91,6 +121,7 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
       });
       streamRef.current = stream;
       wantCameraRef.current = true;
+      if (tgRef.current.status !== 'off') tgRef.current.updateStream(stream);
       const v = videoRef.current;
       v.srcObject = stream;
       await v.play().catch(() => {});
@@ -115,6 +146,7 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
     const next = facing === 'user' ? 'environment' : 'user';
     setFacing(next);
     startCamera(next);
+    tgRef.current.send({ t: 'mirror', on: mirror && next === 'user' });
   }
 
   useEffect(() => () => {
@@ -127,6 +159,7 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
     for (let i = n; i > 0; i--) {
       if (cancelRef.current) break;
       setCountdown((c) => ({ n: i, id: c.id + 1 }));
+      if (duo()) tgRef.current.send({ t: 'tick', n: i });
       if (latest.current.sound) beep(i === 1 ? 1175 : 880);
       await sleep(1000);
     }
@@ -147,34 +180,170 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
   async function shoot(indices) {
     if (busyRef.current) return;
     if (!streamRef.current && !(await startCamera())) return;
+    const shared = duo();
     busyRef.current = true; cancelRef.current = false;
     setBusy(true);
     for (let j = 0; j < indices.length; j++) {
-      const idx = indices[j];
-      setHud(`Frame ${idx + 1} of ${LAYOUTS[latest.current.layout].count}`);
+      const idx = indices[j], total = LAYOUTS[latest.current.layout].count;
+      setHud(`Frame ${idx + 1} of ${total}`);
       setActive(idx);
+      if (shared) tgRef.current.send({ t: 'frame', idx, total });
       await runCountdown(latest.current.timer);
       if (cancelRef.current || !streamRef.current) break;
-      snap(idx);
+      if (shared && duo()) { tgRef.current.send({ t: 'snap', idx }); snapTogether(idx); }
+      else snap(idx);
       if (j < indices.length - 1) await sleep(900);
     }
     busyRef.current = false;
     setBusy(false);
     setActive(-1);
+    const auto = !cancelRef.current && indices.length > 1;
+    if (shared) {
+      tgRef.current.send({ t: 'end', auto });
+      autoNextRef.current = auto;
+      maybeAdvance();
+      return;
+    }
     const p = photosRef.current;
-    if (!cancelRef.current && filledOf(p) === p.length && indices.length > 1) {
+    if (auto && filledOf(p) === p.length) {
       await sleep(700);
       if (stepRef.current === 2) go(3);
     }
   }
 
   function startSession() {
+    // The guest asks; the host runs (or stops) the session for both.
+    if (isGuest()) { tgRef.current.send({ t: 'start' }); return; }
     if (busyRef.current) { cancelRef.current = true; return; }
     const n = photosRef.current.length;
     let targets = photosRef.current.map((p, i) => (p ? -1 : i)).filter((i) => i >= 0);
-    if (!targets.length) { updatePhotos(() => resize([], n)); targets = [...Array(n).keys()]; }
+    if (!targets.length) {
+      updatePhotos(() => resize([], n));
+      tgRef.current.send({ t: 'clear' });
+      targets = [...Array(n).keys()];
+    }
     shoot(targets);
   }
+
+  /* ------------------------------------------------------------ together */
+
+  function snapTogether(idx) {
+    const v = videoRef.current;
+    if (!v.videoWidth) return;
+    const { mirror: m, facing: f, sound: s } = latest.current;
+    const me = toCanvas(v, v.videoWidth, v.videoHeight, m && f === 'user');
+    replay(flashRef.current, 'go');
+    if (s) shutterSound();
+    const h = (halvesRef.current[idx] = { ...halvesRef.current[idx], me, host: tgRef.current.role === 'host' });
+    // If the friend's shot never arrives, keep yours on its own.
+    h.timer = setTimeout(() => {
+      const x = halvesRef.current[idx];
+      if (x && x.me && !x.them) { x.solo = true; placeHalves(idx); }
+    }, 10000);
+    canvasToBuffer(me).then((buf) => tgRef.current.send({ t: 'shot', idx, buf }));
+    placeHalves(idx);
+  }
+
+  async function receiveShot(idx, buf) {
+    const them = await bufferToCanvas(buf);
+    halvesRef.current[idx] = { ...halvesRef.current[idx], them };
+    placeHalves(idx);
+  }
+
+  // The host is always on the left, so both friends get the same picture.
+  function placeHalves(idx) {
+    const h = halvesRef.current[idx];
+    if (!h || !h.me || (!h.them && !h.solo)) return;
+    clearTimeout(h.timer);
+    delete halvesRef.current[idx];
+    const L = LAYOUTS[latest.current.layout];
+    const slot = (L.slots || LAYOUTS[L.composite].slots)[idx];
+    if (!slot) return;
+    const src = h.them ? sideBySide(h.host ? h.me : h.them, h.host ? h.them : h.me, slot.w / slot.h) : h.me;
+    updatePhotos((p) => p.map((x, i) => (i === idx ? { src, cache: {} } : x)));
+    maybeAdvance();
+  }
+
+  function maybeAdvance() {
+    const p = photosRef.current;
+    const waiting = Object.values(halvesRef.current).some((h) => h.me);
+    if (!autoNextRef.current || waiting || filledOf(p) !== p.length) return;
+    autoNextRef.current = false;
+    setTimeout(() => { if (stepRef.current === 2) go(3); }, 700);
+  }
+
+  function onTogetherMessage(m) {
+    const t = tgRef.current;
+    switch (m.t) {
+      case 'open':
+        if (t.role === 'host') t.send({ t: 'layout', id: latest.current.layout, timer: latest.current.timer });
+        t.send({ t: 'mirror', on: latest.current.mirror && latest.current.facing === 'user' });
+        toast('Connected! You are in the booth together.');
+        if (stepRef.current !== 2) go(2);
+        break;
+      case 'left':
+        toast('Your friend left the booth.');
+        if (t.role === 'guest') {
+          busyRef.current = false; setBusy(false); setActive(-1);
+          setCountdown((c) => ({ n: 0, id: c.id }));
+        }
+        break;
+      case 'full':
+        toast('That booth already has two people in it.');
+        leaveTogether();
+        break;
+      case 'layout':
+        if (m.id !== latest.current.layout) applyLayout(m.id);
+        if (m.timer) setTimer(m.timer);
+        break;
+      case 'timer': setTimer(m.n); break;
+      case 'mirror': setRemoteMirror(m.on); break;
+      case 'clear': halvesRef.current = {}; updatePhotos((p) => resize([], p.length)); break;
+      case 'start': if (t.role === 'host') startSession(); break;
+      case 'retake': if (t.role === 'host' && !busyRef.current) shoot([m.i]); break;
+      case 'frame':
+        if (stepRef.current !== 2) go(2);
+        busyRef.current = true; setBusy(true);
+        setHud(`Frame ${m.idx + 1} of ${m.total}`); setActive(m.idx);
+        break;
+      case 'tick':
+        setCountdown((c) => ({ n: m.n, id: c.id + 1 }));
+        if (latest.current.sound) beep(m.n === 1 ? 1175 : 880);
+        break;
+      case 'snap':
+        setCountdown((c) => ({ n: 0, id: c.id }));
+        snapTogether(m.idx);
+        break;
+      case 'end':
+        busyRef.current = false; setBusy(false); setActive(-1);
+        setCountdown((c) => ({ n: 0, id: c.id }));
+        autoNextRef.current = m.auto;
+        maybeAdvance();
+        break;
+      case 'shot': receiveShot(m.idx, m.buf); break;
+      default:
+    }
+  }
+
+  async function invite() {
+    if (!streamRef.current && !(await startCamera())) return;
+    together.host(streamRef.current);
+  }
+
+  async function joinFriend() {
+    if (!streamRef.current && !(await startCamera())) return;
+    together.join(joinRoom, streamRef.current);
+  }
+
+  function leaveTogether() {
+    tgRef.current.leave();
+    halvesRef.current = {};
+    setJoinRoom(null);
+    if (location.hash.includes('room=')) history.replaceState(null, '', location.pathname + location.search);
+  }
+
+  // Opening an invite link takes you straight to the camera step.
+  useEffect(() => { if (joinRoom) go(2); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Space starts a session on the capture step.
   const sessionRef = useRef(startSession);
@@ -223,7 +392,8 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
 
   function onShot(i) {
     if (busyRef.current) return;
-    if (streamRef.current) shoot([i]);
+    if (isGuest()) tgRef.current.send({ t: 'retake', i });
+    else if (streamRef.current) shoot([i]);
     else pickPhotos(i);
   }
 
@@ -271,7 +441,8 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
   const booth = {
     hidden: step !== 2, videoRef, flashRef, live, busy, countdown, hud, active,
     layout, template, setTemplate, photos, looked, look, setLook,
-    timer, setTimer, mirror, setMirror, sound, setSound, facing,
+    timer, setTimer: setTimerShared, mirror, setMirror: setMirrorShared, sound, setSound, facing,
+    together, remoteMirror, joinRoom, invite, joinFriend, leaveTogether,
     caption, captionEdited: customCaption !== null, setCaption: setCustomCaption,
     sub, setSub, showCaption, setShowCaption, overlay, setOverlay,
     startCamera, flipCamera, startSession, pickPhotos, onShot, go,

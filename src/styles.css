@@ -288,6 +288,28 @@ p { margin: 0; }
 .rec { width: 8px; height: 8px; border-radius: 50%; background: #ff5a5a; animation: pulse 1s infinite; }
 @keyframes pulse { 50% { opacity: .3; } }
 
+/* shoot together: the host is on the left for both friends */
+.stage.duo video { width: 50%; right: auto; }
+.stage.duo .me, .stage.duo.guest .them { left: 0; }
+.stage.duo .them, .stage.duo.guest .me { left: 50%; }
+.duo-split { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px; background: rgba(255, 255, 255, .55); pointer-events: none; }
+.them-wait { position: absolute; top: 0; bottom: 0; left: 50%; width: 50%; display: grid; place-items: center; color: #cfc4b4; font-size: .9rem; }
+.stage.guest .them-wait { left: 0; }
+.tag {
+  position: absolute; bottom: 12px; left: 12px; padding: 3px 10px; border-radius: 999px;
+  background: rgba(0, 0, 0, .45); color: #fff; font-size: .72rem; font-weight: 500; pointer-events: none;
+}
+.stage.duo .them-tag, .stage.duo.guest .me-tag { left: calc(50% + 12px); }
+.stage.duo.guest .them-tag { left: 12px; }
+.together-status { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--ink-2); }
+.dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #3fb950; }
+.dot.wait { background: var(--gold); animation: pulse 1.4s infinite; }
+.invite { display: flex; gap: 8px; }
+.invite .input { flex: 1; min-width: 0; font-size: .8rem; }
+.together .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.together > .btn-link { align-self: flex-start; padding-inline: 0; }
+.together-error { color: #c2410c; }
+
 .shoot-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; margin-top: 20px; }
 .shoot-bar > :first-child { justify-self: end; }
 .shoot-bar > :last-child { justify-self: start; }

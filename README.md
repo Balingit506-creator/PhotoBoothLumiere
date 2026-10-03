@@ -27,6 +27,12 @@ npm run preview   # serve the build
 | `src/lib/media.js` | Image loading, shutter sounds, file naming |
 | `src/styles.css` | Design tokens (light and dark), layout, responsive rules |
 
+## Shoot together
+
+Two people in different places can share one booth. In the capture step, **Invite a friend** creates a link (`#room=…`); whoever opens it joins with their own camera. The host runs the countdown for both, each browser snaps its own camera, the two shots are swapped and every frame is joined side by side (host on the left).
+
+Video and photos go directly between the two browsers over WebRTC, encrypted. The free PeerJS cloud service only introduces them, and PeerJS is loaded only when someone uses this feature. If a strict network blocks direct connections, add your own TURN server in `src/together.config.js`. The code lives in `src/lib/useTogether.js` and the together section of `src/components/Booth.jsx`.
+
 ## Donations
 
 Open `src/donate.config.js` and fill in the `DONATE` block at the top with your PayPal.Me name, Ko-fi, Buy Me a Coffee or GitHub Sponsors username, or a Stripe Payment Link. Only the platforms you fill in are shown. PayPal also receives the amount the visitor picked. Until something is filled in, the buttons show a "coming soon" message.
