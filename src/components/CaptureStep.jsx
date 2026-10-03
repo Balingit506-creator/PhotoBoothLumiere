@@ -43,7 +43,7 @@ function TogetherPanel({ booth }) {
       <span className="label">Shoot together <small>beta</small></span>
       {status === 'off' && !joinRoom && (
         <>
-          <p className="hint">Far apart? Invite a friend and you will share every frame, side by side.</p>
+          <p className="hint">Far apart? Invite a friend and take turns: you shoot one frame, they shoot the next.</p>
           <button className="btn btn-ghost btn-sm btn-block" type="button" onClick={invite}>Invite a friend</button>
         </>
       )}
@@ -71,7 +71,7 @@ function TogetherPanel({ booth }) {
       )}
       {status === 'connected' && (
         <>
-          <p className="together-status"><span className="dot"></span>Connected. Either of you can press the shutter.</p>
+          <p className="together-status"><span className="dot"></span>Connected. Either of you can press the shutter; you take turns frame by frame.</p>
           <button className="btn btn-link btn-sm" type="button" onClick={leaveTogether}>Leave</button>
         </>
       )}
@@ -93,7 +93,7 @@ export default function CaptureStep({ booth }) {
     hidden, videoRef, flashRef, live, busy, countdown, hud, active,
     layout, photos, looked, look, setLook, timer, setTimer, mirror, setMirror, sound, setSound, facing,
     startCamera, flipCamera, startSession, pickPhotos, onShot, go,
-    together, remoteMirror, joinRoom, joinFriend,
+    together, remoteMirror, joinRoom, joinFriend, turn,
   } = booth;
   const duo = together.status === 'connected';
   const guest = together.role === 'guest';
@@ -112,15 +112,15 @@ export default function CaptureStep({ booth }) {
     <div className="panel" hidden={hidden}>
       <div className="capture">
         <div className="stage-col">
-          <div className={'stage' + (duo ? ' duo' : '') + (guest ? ' guest' : '')}>
+          <div className={'stage' + (duo ? ' duo' : '') + (guest ? ' guest' : '') + (duo && turn ? ' turn-' + turn : '')}>
             <video ref={videoRef} className="cam me" style={videoStyle} playsInline muted autoPlay></video>
             {duo && (
               <>
                 <RemoteVideo stream={together.remoteStream} style={{ filter: videoStyle.filter, transform: remoteMirror ? 'scaleX(-1)' : undefined }} />
                 {!together.remoteStream && <div className="them-wait">Connecting video…</div>}
                 <div className="duo-split" aria-hidden="true"></div>
-                <span className="tag me-tag">You</span>
-                <span className="tag them-tag">Friend</span>
+                <span className="tag me-tag">{turn === 'me' ? 'Your turn' : 'You'}</span>
+                <span className="tag them-tag">{turn === 'them' ? 'Friend’s turn' : 'Friend'}</span>
               </>
             )}
             <div className="stage-empty" hidden={live}>

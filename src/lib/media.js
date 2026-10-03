@@ -31,29 +31,13 @@ export function toCanvas(source, sw, sh, mirror) {
   return c;
 }
 
-function drawCover(ctx, img, x, y, w, h) {
-  const s = Math.max(w / img.width, h / img.height), sw = w / s, sh = h / s;
-  ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, x, y, w, h);
-}
-
-/** Two shots joined into one photo, each filling half; `aspect` is the photo slot's width / height. */
-export function sideBySide(left, right, aspect) {
-  const h = 1200, w = Math.round(h * aspect), half = Math.round(w / 2);
-  const c = document.createElement('canvas');
-  c.width = w; c.height = h;
-  const ctx = c.getContext('2d');
-  drawCover(ctx, left, 0, 0, half, h);
-  drawCover(ctx, right, half, 0, w - half, h);
-  return c;
-}
-
-/** A capture as JPEG bytes, small enough to send to a friend quickly. */
-export function canvasToBuffer(canvas, max = 1280) {
+/** A capture as JPEG bytes for sending to a friend; it becomes their copy of the frame. */
+export function canvasToBuffer(canvas, max = 1600) {
   const s = Math.min(1, max / Math.max(canvas.width, canvas.height));
   const c = document.createElement('canvas');
   c.width = Math.round(canvas.width * s); c.height = Math.round(canvas.height * s);
   c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
-  return new Promise((res) => c.toBlob((b) => b.arrayBuffer().then(res), 'image/jpeg', 0.9));
+  return new Promise((res) => c.toBlob((b) => b.arrayBuffer().then(res), 'image/jpeg', 0.92));
 }
 
 export async function bufferToCanvas(buf) {

@@ -29,7 +29,7 @@ npm run preview   # serve the build
 
 ## Shoot together
 
-Two people in different places can share one booth. In the capture step, **Invite a friend** creates a link (`#room=…`); whoever opens it joins with their own camera. The host runs the countdown for both, each browser snaps its own camera, the two shots are swapped and every frame is joined side by side (host on the left).
+Two people in different places can share one booth. In the capture step, **Invite a friend** creates a link (`#room=…`); whoever opens it joins with their own camera. The host runs the countdown for both and the friends take turns: the host shoots frames 1, 3…, the guest frames 2, 4 and so on. Whoever's turn it is sends their shot to the other, so both end up with the same strip.
 
 Video and photos go directly between the two browsers over WebRTC, encrypted. The free PeerJS cloud service only introduces them, and PeerJS is loaded only when someone uses this feature. If a strict network blocks direct connections, add your own TURN server in `src/together.config.js`. The code lives in `src/lib/useTogether.js` and the together section of `src/components/Booth.jsx`.
 

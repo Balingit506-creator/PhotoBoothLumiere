@@ -1,7 +1,7 @@
 /* Lumière Booth — the 3-step booth: layout, capture, design & download. */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LAYOUTS, TEMPLATES, render } from '../lib/booth.js';
-import { beep, bufferToCanvas, canvasToBuffer, fileName, loadImage, lookOf, replay, shutterSound, sideBySide, sleep, toCanvas, today } from '../lib/media.js';
+import { beep, bufferToCanvas, canvasToBuffer, fileName, loadImage, lookOf, replay, shutterSound, sleep, toCanvas, today } from '../lib/media.js';
 import { roomFromHash, useTogether } from '../lib/useTogether.js';
 import { useArt, useToast } from '../context.js';
 import StripCanvas from './StripCanvas.jsx';
@@ -60,7 +60,8 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
   const together = useTogether(onTogetherMessage);
   const tgRef = useRef(together);
   tgRef.current = together;
-  const halvesRef = useRef({}); // frame index -> { me, them, host, timer }
+  const [turn, setTurn] = useState(null); // whose frame is being taken: 'me' | 'them'
+  const pendingRef = useRef({}); // frame index -> stand-in timer while the friend's shot is on its way
   const autoNextRef = useRef(false);
   const duo = () => tgRef.current.status === 'connected';
   const isGuest = () => duo() && tgRef.current.role === 'guest';
@@ -87,7 +88,7 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
   function applyLayout(id) {
     setLayoutId(id);
     latest.current.layout = id;
-    halvesRef.current = {};
+    clearPending();
     updatePhotos((p) => resize(p, LAYOUTS[id].count));
   }
 
@@ -185,9 +186,9 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
     setBusy(true);
     for (let j = 0; j < indices.length; j++) {
       const idx = indices[j], total = LAYOUTS[latest.current.layout].count;
-      setHud(`Frame ${idx + 1} of ${total}`);
+      setHud(`Frame ${idx + 1} of ${total}` + (shared ? ` · ${turnLabel(idx)}` : ''));
       setActive(idx);
-      if (shared) tgRef.current.send({ t: 'frame', idx, total });
+      if (shared) { setTurn(myTurn(idx) ? 'me' : 'them'); tgRef.current.send({ t: 'frame', idx, total }); }
       await runCountdown(latest.current.timer);
       if (cancelRef.current || !streamRef.current) break;
       if (shared && duo()) { tgRef.current.send({ t: 'snap', idx }); snapTogether(idx); }
@@ -197,6 +198,7 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
     busyRef.current = false;
     setBusy(false);
     setActive(-1);
+    setTurn(null);
     const auto = !cancelRef.current && indices.length > 1;
     if (shared) {
       tgRef.current.send({ t: 'end', auto });
@@ -227,46 +229,49 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
 
   /* ------------------------------------------------------------ together */
 
+  // Friends take turns: the host takes frames 1, 3…, the guest frames 2, 4…
+  const myTurn = (idx) => (idx % 2 === 0) === (tgRef.current.role === 'host');
+  const turnLabel = (idx) => (myTurn(idx) ? 'Your turn' : "Your friend's turn");
+
+  function clearPending() {
+    Object.values(pendingRef.current).forEach(clearTimeout);
+    pendingRef.current = {};
+  }
+
   function snapTogether(idx) {
     const v = videoRef.current;
     if (!v.videoWidth) return;
     const { mirror: m, facing: f, sound: s } = latest.current;
-    const me = toCanvas(v, v.videoWidth, v.videoHeight, m && f === 'user');
+    const shot = toCanvas(v, v.videoWidth, v.videoHeight, m && f === 'user');
     replay(flashRef.current, 'go');
     if (s) shutterSound();
-    const h = (halvesRef.current[idx] = { ...halvesRef.current[idx], me, host: tgRef.current.role === 'host' });
-    // If the friend's shot never arrives, keep yours on its own.
-    h.timer = setTimeout(() => {
-      const x = halvesRef.current[idx];
-      if (x && x.me && !x.them) { x.solo = true; placeHalves(idx); }
+    if (myTurn(idx)) {
+      placeShot(idx, shot);
+      canvasToBuffer(shot).then((buf) => tgRef.current.send({ t: 'shot', idx, buf }));
+      return;
+    }
+    // The friend's shot is on its way; ours stands in if it never arrives.
+    pendingRef.current[idx] = setTimeout(() => {
+      delete pendingRef.current[idx];
+      placeShot(idx, shot);
     }, 10000);
-    canvasToBuffer(me).then((buf) => tgRef.current.send({ t: 'shot', idx, buf }));
-    placeHalves(idx);
   }
 
   async function receiveShot(idx, buf) {
-    const them = await bufferToCanvas(buf);
-    halvesRef.current[idx] = { ...halvesRef.current[idx], them };
-    placeHalves(idx);
+    const shot = await bufferToCanvas(buf);
+    clearTimeout(pendingRef.current[idx]);
+    delete pendingRef.current[idx];
+    placeShot(idx, shot);
   }
 
-  // The host is always on the left, so both friends get the same picture.
-  function placeHalves(idx) {
-    const h = halvesRef.current[idx];
-    if (!h || !h.me || (!h.them && !h.solo)) return;
-    clearTimeout(h.timer);
-    delete halvesRef.current[idx];
-    const L = LAYOUTS[latest.current.layout];
-    const slot = (L.slots || LAYOUTS[L.composite].slots)[idx];
-    if (!slot) return;
-    const src = h.them ? sideBySide(h.host ? h.me : h.them, h.host ? h.them : h.me, slot.w / slot.h) : h.me;
+  function placeShot(idx, src) {
     updatePhotos((p) => p.map((x, i) => (i === idx ? { src, cache: {} } : x)));
     maybeAdvance();
   }
 
   function maybeAdvance() {
     const p = photosRef.current;
-    const waiting = Object.values(halvesRef.current).some((h) => h.me);
+    const waiting = Object.keys(pendingRef.current).length > 0;
     if (!autoNextRef.current || waiting || filledOf(p) !== p.length) return;
     autoNextRef.current = false;
     setTimeout(() => { if (stepRef.current === 2) go(3); }, 700);
@@ -284,7 +289,7 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
       case 'left':
         toast('Your friend left the booth.');
         if (t.role === 'guest') {
-          busyRef.current = false; setBusy(false); setActive(-1);
+          busyRef.current = false; setBusy(false); setActive(-1); setTurn(null);
           setCountdown((c) => ({ n: 0, id: c.id }));
         }
         break;
@@ -298,13 +303,14 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
         break;
       case 'timer': setTimer(m.n); break;
       case 'mirror': setRemoteMirror(m.on); break;
-      case 'clear': halvesRef.current = {}; updatePhotos((p) => resize([], p.length)); break;
+      case 'clear': clearPending(); updatePhotos((p) => resize([], p.length)); break;
       case 'start': if (t.role === 'host') startSession(); break;
       case 'retake': if (t.role === 'host' && !busyRef.current) shoot([m.i]); break;
       case 'frame':
         if (stepRef.current !== 2) go(2);
         busyRef.current = true; setBusy(true);
-        setHud(`Frame ${m.idx + 1} of ${m.total}`); setActive(m.idx);
+        setHud(`Frame ${m.idx + 1} of ${m.total} · ${turnLabel(m.idx)}`); setActive(m.idx);
+        setTurn(myTurn(m.idx) ? 'me' : 'them');
         break;
       case 'tick':
         setCountdown((c) => ({ n: m.n, id: c.id + 1 }));
@@ -315,7 +321,7 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
         snapTogether(m.idx);
         break;
       case 'end':
-        busyRef.current = false; setBusy(false); setActive(-1);
+        busyRef.current = false; setBusy(false); setActive(-1); setTurn(null);
         setCountdown((c) => ({ n: 0, id: c.id }));
         autoNextRef.current = m.auto;
         maybeAdvance();
@@ -337,7 +343,7 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
 
   function leaveTogether() {
     tgRef.current.leave();
-    halvesRef.current = {};
+    clearPending();
     setJoinRoom(null);
     if (location.hash.includes('room=')) history.replaceState(null, '', location.pathname + location.search);
   }
@@ -442,7 +448,7 @@ export default function Booth({ template, setTemplate, tipNudge, onDownloaded })
     hidden: step !== 2, videoRef, flashRef, live, busy, countdown, hud, active,
     layout, template, setTemplate, photos, looked, look, setLook,
     timer, setTimer: setTimerShared, mirror, setMirror: setMirrorShared, sound, setSound, facing,
-    together, remoteMirror, joinRoom, invite, joinFriend, leaveTogether,
+    together, remoteMirror, joinRoom, invite, joinFriend, leaveTogether, turn,
     caption, captionEdited: customCaption !== null, setCaption: setCustomCaption,
     sub, setSub, showCaption, setShowCaption, overlay, setOverlay,
     startCamera, flipCamera, startSession, pickPhotos, onShot, go,

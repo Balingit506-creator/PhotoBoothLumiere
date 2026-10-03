@@ -288,8 +288,9 @@ p { margin: 0; }
 .rec { width: 8px; height: 8px; border-radius: 50%; background: #ff5a5a; animation: pulse 1s infinite; }
 @keyframes pulse { 50% { opacity: .3; } }
 
-/* shoot together: the host is on the left for both friends */
-.stage.duo video { width: 50%; right: auto; }
+/* shoot together: the host is on the left for both friends; the friend whose turn it is stays bright */
+.stage.duo video { width: 50%; right: auto; transition: opacity .3s; }
+.stage.turn-me .them, .stage.turn-them .me { opacity: .35; }
 .stage.duo .me, .stage.duo.guest .them { left: 0; }
 .stage.duo .them, .stage.duo.guest .me { left: 50%; }
 .duo-split { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px; background: rgba(255, 255, 255, .55); pointer-events: none; }
@@ -301,6 +302,7 @@ p { margin: 0; }
 }
 .stage.duo .them-tag, .stage.duo.guest .me-tag { left: calc(50% + 12px); }
 .stage.duo.guest .them-tag { left: 12px; }
+.stage.turn-me .me-tag, .stage.turn-them .them-tag { background: var(--gold); color: #1d1a17; }
 .together-status { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--ink-2); }
 .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #3fb950; }
 .dot.wait { background: var(--gold); animation: pulse 1.4s infinite; }
