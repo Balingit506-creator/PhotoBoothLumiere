@@ -11,6 +11,7 @@
   --gold: #a9804a;
   --gold-2: #c9a36b;
   --gold-soft: #f1e6d3;
+  --snap-gold: #c9a36b;
   --stage: #141210;
   --shadow: 0 1px 2px rgba(40, 30, 20, .05), 0 12px 40px -12px rgba(60, 40, 20, .18);
   --shadow-lg: 0 30px 80px -24px rgba(50, 30, 10, .35);
@@ -23,7 +24,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #12100e; --bg-2: #1a1714; --surface: #1c1916; --ink: #f3ede4; --ink-2: #d9d0c3;
-    --muted: #a4988a; --line: #2f2a24; --gold: #d2ab6e; --gold-2: #e2c28c; --gold-soft: #2a241c;
+    --muted: #a4988a; --line: #2f2a24; --gold: #d2ab6e; --gold-2: #e2c28c; --gold-soft: #2a241c; --snap-gold: #9a7038;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 40px -12px rgba(0, 0, 0, .6);
     --shadow-lg: 0 30px 80px -24px rgba(0, 0, 0, .8);
     color-scheme: dark;
@@ -31,7 +32,7 @@
 }
 :root[data-theme="dark"] {
   --bg: #12100e; --bg-2: #1a1714; --surface: #1c1916; --ink: #f3ede4; --ink-2: #d9d0c3;
-  --muted: #a4988a; --line: #2f2a24; --gold: #d2ab6e; --gold-2: #e2c28c; --gold-soft: #2a241c;
+  --muted: #a4988a; --line: #2f2a24; --gold: #d2ab6e; --gold-2: #e2c28c; --gold-soft: #2a241c; --snap-gold: #9a7038;
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 40px -12px rgba(0, 0, 0, .6);
   --shadow-lg: 0 30px 80px -24px rgba(0, 0, 0, .8);
   color-scheme: dark;
@@ -87,6 +88,52 @@ p { margin: 0; }
 .btn-dark:hover:not(:disabled) { background: var(--ink-2); }
 .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink); }
 .btn-ghost:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+/* "Start snapping": shimmer + glow at rest, flash on hover, shutter on click */
+.btn-snap {
+  position: relative; overflow: hidden; isolation: isolate;
+  animation: snap-glow 3.2s ease-in-out infinite;
+}
+.btn-snap::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--gold-2) 45%, transparent) 50%, transparent 70%);
+  transform: translateX(-120%); animation: snap-shimmer 4.8s ease-in-out infinite 1s;
+}
+.snap-icon { flex: none; overflow: visible; }
+.snap-body { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
+.snap-lens { fill: none; stroke: var(--snap-gold); stroke-width: 1.7; transform-origin: 12px 13px; transition: transform .3s; }
+.snap-flashbulb { fill: var(--snap-gold); opacity: 0; }
+.snap-sparkle {
+  position: absolute; right: 13px; top: 7px; line-height: 1;
+  color: var(--snap-gold); font-size: .62rem; opacity: 0;
+  transform: scale(.4) rotate(-45deg); transition: opacity .3s, transform .4s cubic-bezier(.3, 1.6, .5, 1);
+}
+.btn-snap:hover:not(:disabled) { transform: translateY(-2px); }
+.btn-snap:hover .snap-lens { transform: scale(.82); }
+.btn-snap:hover .snap-flashbulb { animation: snap-blink 1.6s ease-out infinite; }
+.btn-snap:hover .snap-sparkle { opacity: 1; transform: scale(1) rotate(0); }
+.btn-snap:hover::before { animation-duration: 1.6s; animation-delay: 0s; }
+.snap-shot {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 50%, #fff, color-mix(in srgb, var(--gold-2) 70%, #fff) 45%, transparent 75%);
+  animation: snap-shot .6s ease-out;
+}
+@keyframes snap-glow {
+  0%, 100% { box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .5), 0 0 0 0 color-mix(in srgb, var(--gold) 45%, transparent); }
+  50% { box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .5), 0 0 0 7px color-mix(in srgb, var(--gold) 0%, transparent); }
+}
+@keyframes snap-shimmer {
+  0% { transform: translateX(-120%); }
+  45%, 100% { transform: translateX(120%); }
+}
+@keyframes snap-blink {
+  0%, 100% { opacity: 0; }
+  8% { opacity: 1; }
+  30% { opacity: .2; }
+}
+@keyframes snap-shot {
+  0% { opacity: 1; transform: scale(.6); }
+  100% { opacity: 0; transform: scale(1.4); }
+}
 .btn-light { background: #fbf6ee; color: #1d1a17; }
 .btn-outline-light { background: transparent; color: #fbf6ee; border-color: rgba(251, 246, 238, .35); }
 .btn-outline-light:hover { border-color: #fbf6ee; }
@@ -110,12 +157,10 @@ p { margin: 0; }
 .nav-inner { max-width: 1240px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 24px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
 .brand-mark {
-  width: 30px; height: 30px; border-radius: 9px; background: var(--ink); position: relative; flex: none;
+  width: auto; height: 40px; flex: none; object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(40, 25, 10, .18)); transition: transform .25s;
 }
-.brand-mark::after {
-  content: ""; position: absolute; inset: 7px; border-radius: 50%;
-  border: 2px solid var(--gold-2);
-}
+.brand:hover .brand-mark { transform: rotate(-4deg) scale(1.05); }
 .brand-name { font: 600 1.35rem/1 var(--serif); letter-spacing: .01em; }
 .brand-name em { font-style: italic; font-weight: 500; color: var(--gold); margin-left: 3px; }
 .nav-links { display: flex; gap: 28px; margin-left: auto; }

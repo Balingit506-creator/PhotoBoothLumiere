@@ -19,7 +19,7 @@ function toTop(e) {
 export function Brand() {
   return (
     <a className="brand" href="#top" aria-label="Lumière Booth home" onClick={toTop}>
-      <span className="brand-mark" aria-hidden="true"></span>
+      <img className="brand-mark" src="logo.webp" alt="" width="56" height="40" decoding="async" />
       <span className="brand-name">Lumière<em>Booth</em></span>
     </a>
   );
