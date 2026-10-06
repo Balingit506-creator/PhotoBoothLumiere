@@ -53,6 +53,17 @@ export default function PayPalCheckout({ amount, onPaid, onError, fallback }) {
     return () => { alive = false; buttons?.close?.(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // PayPal's inline card form assumes a white page (its close ✕ is dark), so give it a
+  // white panel while it's open. The two collapsed buttons are ~150px tall.
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(() => setExpanded(el.scrollHeight > 200));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [failed]);
+
   if (failed) return fallback;
-  return <div className="paypal-box" ref={box}></div>;
+  return <div className={'paypal-box' + (expanded ? ' expanded' : '')} ref={box}></div>;
 }

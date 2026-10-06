@@ -29,11 +29,12 @@ export const DONATE = {
  *   accountName: the account name as the app shows it, e.g. 'Juaren B.'
  *   qr:      your "Receive money" QR image saved in public/donate/,
  *            e.g. 'donate/gcash-qr.png' (no leading slash). Optional.
- * A wallet appears on the site once its number or QR is filled in.
+ *   enabled: false hides the wallet without losing its details.
+ * A wallet appears on the site once it's enabled and has a number or QR.
  */
 export const WALLETS = [
-  { key: 'gcash', name: 'GCash', color: '#007dfe', number: '', accountName: 'Juaren B.', qr: 'donate/gcash-qr.png' },
-  { key: 'maya', name: 'Maya', color: '#00b14f', number: '', accountName: 'Juaren B.', qr: 'donate/maya-qr.png' },
+  { key: 'gcash', enabled: false, name: 'GCash', color: '#007dfe', number: '', accountName: 'Juaren B.', qr: 'donate/gcash-qr.png' },
+  { key: 'maya', enabled: false, name: 'Maya', color: '#00b14f', number: '', accountName: 'Juaren B.', qr: 'donate/maya-qr.png' },
 ];
 
 export const PLATFORMS = [
@@ -43,15 +44,3 @@ export const PLATFORMS = [
   { key: 'github', name: 'GitHub Sponsors', url: (v) => `https://github.com/sponsors/${encodeURIComponent(v)}` },
   { key: 'stripe', name: 'Card (Stripe)', url: (v) => v },
 ];
-
-/*
- * Ad-free passes: every tip turns ads off for a while, then they come back.
- *   daysPerDollar:  ad-free days per $1 of a PayPal tip ($3 → 15 days).
- *   maxDays:        the longest a pass can run.
- *   walletDays:     days for a GCash or Maya tip (the site can't see the amount).
- */
-export const AD_FREE = {
-  daysPerDollar: 5,
-  maxDays: 365,
-  walletDays: 5,
-};

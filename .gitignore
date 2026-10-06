@@ -1,1 +1,8 @@
 node_modules
+
+# local secrets and editor/OS clutter
+.env
+.env.*
+*.log
+.DS_Store
+Thumbs.db

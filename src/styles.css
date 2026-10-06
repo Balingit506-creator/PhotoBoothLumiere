@@ -596,7 +596,11 @@ kbd { font: 500 .72rem var(--sans); border: 1px solid var(--line); border-bottom
 .adfree-note { text-align: center; font-size: .85rem; color: var(--muted); }
 .adfree-note strong { color: var(--gold); font-weight: 600; }
 /* PayPal's frames are light-themed; matching color-scheme keeps them transparent in dark mode */
-.paypal-box { min-height: 48px; position: relative; z-index: 0; color-scheme: light; }
+.paypal-box {
+  min-height: 48px; position: relative; z-index: 0; color-scheme: light;
+  border-radius: 18px; transition: background .25s, padding .25s, box-shadow .25s;
+}
+.paypal-box.expanded { background: #fff; padding: 14px 12px 10px; box-shadow: 0 0 0 1px var(--line), var(--shadow); }
 .adfree {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px;
   padding: 10px 10px 10px 16px; border-radius: 16px; font-size: .9rem; font-weight: 500;
