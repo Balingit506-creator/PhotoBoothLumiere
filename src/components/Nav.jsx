@@ -25,11 +25,14 @@ export function Brand() {
   );
 }
 
+const Heart = () => <span className="nav-heart" aria-hidden="true">♥</span>;
+
 const LINKS = [
   ['How it works', '#how'],
   ['Templates', '#templates'],
+  ['Support us', '#support', true], // true: gets the little gold heart
   ['FAQ', '#faq'],
-  ['Support', '#support'],
+  ['Suggestions', '#suggest'],
 ];
 
 export default function Nav() {
@@ -51,7 +54,7 @@ export default function Nav() {
       <div className="nav-inner">
         <Brand />
         <nav className="nav-links" aria-label="Primary">
-          {LINKS.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
+          {LINKS.map(([label, href, heart]) => <a key={href} href={href}>{label}{heart && <Heart />}</a>)}
         </nav>
         <div className="nav-actions">
           <button className="icon-btn" type="button" aria-label="Toggle dark mode" onClick={toggleTheme}>
@@ -65,7 +68,7 @@ export default function Nav() {
         </div>
       </div>
       <nav className="mobile-menu" id="mobile-menu" aria-label="Mobile" hidden={!open}>
-        {LINKS.map(([label, href]) => <a key={href} href={href} onClick={close}>{label}</a>)}
+        {LINKS.map(([label, href, heart]) => <a key={href} href={href} onClick={close}>{label}{heart && <Heart />}</a>)}
         <a className="btn btn-dark btn-block" href="#booth" onClick={close}>Open the booth</a>
       </nav>
     </header>

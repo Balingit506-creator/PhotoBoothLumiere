@@ -12,6 +12,7 @@ import AdSlot from './components/AdSlot.jsx';
 import Gear from './components/Gear.jsx';
 import Support from './components/Support.jsx';
 import Faq from './components/Faq.jsx';
+import Suggest from './components/Suggest.jsx';
 import Footer from './components/Footer.jsx';
 
 export default function App() {
@@ -64,6 +65,7 @@ export default function App() {
           <Gear />
           <Support />
           <Faq />
+          <Suggest />
         </main>
         <Footer />
         <div className={'toast' + (toastMsg.show ? ' show' : '')} role="status" aria-live="polite">{toastMsg.text}</div>
