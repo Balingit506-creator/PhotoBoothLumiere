@@ -9,6 +9,7 @@ import Gallery from './components/Gallery.jsx';
 import Booth from './components/Booth.jsx';
 import Features from './components/Features.jsx';
 import AdSlot from './components/AdSlot.jsx';
+import BannerAd from './components/BannerAd.jsx';
 import SocialBar from './components/SocialBar.jsx';
 import Gear from './components/Gear.jsx';
 import Support from './components/Support.jsx';
@@ -59,14 +60,15 @@ export default function App() {
         <main>
           <Hero />
           <HowItWorks />
+          <BannerAd />
           <Gallery onUse={pickTemplate} />
           <Booth template={template} setTemplate={setTemplate} tipNudge={tipNudge} onDownloaded={() => setTipNudge(true)} />
           <Features />
           <AdSlot />
           <Gear />
           <Support />
-          <Faq />
           <Suggest />
+          <Faq />
         </main>
         <Footer />
         <SocialBar />

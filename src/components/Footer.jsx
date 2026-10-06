@@ -64,7 +64,7 @@ const columns = [
     title: 'Help',
     links: [
       ['FAQ', '#faq'],
-      ['Support the project', '#support'],
+      ['Support us', '#support'],
       ['Suggest an idea', '#suggest'],
     ],
   },

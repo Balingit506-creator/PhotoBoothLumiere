@@ -49,33 +49,39 @@ export default function Suggest() {
             <button className="btn btn-ghost btn-sm" type="button" onClick={() => setStatus('idle')}>Send another</button>
           </div>
         ) : (
-          <form onSubmit={submit}>
-            <div className="suggest-head">
-              <span className="suggest-icon" aria-hidden="true">💡</span>
-              <div>
-                <h3>Got an idea?</h3>
-                <p className="muted small">A template you’d love, a feature you’re missing, or a bug. Tell us.</p>
+          <>
+            <div className="suggest-copy">
+              <p className="eyebrow">Suggestion box</p>
+              <h2>Got an <em>idea?</em></h2>
+              <p className="muted">A template you’d love, a feature you’re missing, or a bug. Every idea is read.</p>
+            </div>
+            <form onSubmit={submit}>
+              <div className="chips" role="radiogroup" aria-label="Topic">
+                {TOPICS.map((t) => (
+                  <button key={t} type="button" role="radio" aria-checked={t === topic}
+                    className={'chip' + (t === topic ? ' on' : '')} onClick={() => setTopic(t)}>{t}</button>
+                ))}
               </div>
-            </div>
-            <div className="chips small" role="radiogroup" aria-label="Topic">
-              {TOPICS.map((t) => (
-                <button key={t} type="button" role="radio" aria-checked={t === topic}
-                  className={'chip' + (t === topic ? ' on' : '')} onClick={() => setTopic(t)}>{t}</button>
-              ))}
-            </div>
-            <textarea className="input" rows={3} maxLength={600} required placeholder="Your suggestion…"
-              aria-label="Your suggestion" value={message} onChange={(e) => setMessage(e.target.value)} />
-            <div className="suggest-row">
-              <input className="input" type="email" placeholder="Email (optional, for a reply)" aria-label="Email (optional)"
-                value={email} onChange={(e) => setEmail(e.target.value)} />
-              <button className="btn btn-dark" type="submit" disabled={status === 'sending' || !message.trim()}>
-                {status === 'sending' ? 'Sending…' : 'Send'}
+              <label className="field">
+                <span className="label">Your idea</span>
+                <span className="suggest-text">
+                  <textarea className="input" rows={4} maxLength={600} required
+                    placeholder="e.g. A wedding template in sage green, or a four-photo grid…"
+                    value={message} onChange={(e) => setMessage(e.target.value)} />
+                  <span className="suggest-count">{message.length} / 600</span>
+                </span>
+              </label>
+              <label className="field">
+                <span className="label">Email (optional, for a reply)</span>
+                <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </label>
+              <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" className="suggest-trap" aria-hidden="true" />
+              {status === 'error' && <p className="suggest-error small">That didn’t send. Please try again in a moment.</p>}
+              <button className="btn btn-dark suggest-send" type="submit" disabled={status === 'sending' || !message.trim()}>
+                {status === 'sending' ? 'Sending…' : 'Send suggestion'}
               </button>
-            </div>
-            <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" className="suggest-trap" aria-hidden="true" />
-            {status === 'error' && <p className="suggest-error small">That didn’t send. Please try again in a moment.</p>}
-            <p className="hint">{message.length}/600</p>
-          </form>
+            </form>
+          </>
         )}
       </div>
     </section>

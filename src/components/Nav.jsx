@@ -31,8 +31,8 @@ const LINKS = [
   ['How it works', '#how'],
   ['Templates', '#templates'],
   ['Support us', '#support', true], // true: gets the little gold heart
-  ['FAQ', '#faq'],
   ['Suggestions', '#suggest'],
+  ['FAQ', '#faq'],
 ];
 
 export default function Nav() {

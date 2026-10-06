@@ -16,3 +16,15 @@ export const ADSTERRA_NATIVE = {
  * It loads once on every page view. Leave it '' to turn it off.
  */
 export const ADSTERRA_SOCIAL_BAR = 'https://bauval.org/14/527e525e84541e63864c02dc23c5d6d1';
+
+/*
+ * Adsterra Banner: create a Banner unit in Adsterra (one 728x90 for desktop and
+ * one 320x50 for phones), then copy from each code snippet:
+ *   key:  the 'key' value inside atOptions
+ *   src:  the second script's src  (…/<key>/invoke.js)
+ * A slot with an empty key is skipped; with both empty the banner space is hidden.
+ */
+export const ADSTERRA_BANNER = {
+  desktop: { key: '2535bd619c6e708a67dfc9b3186a438a', src: 'https://bauval.org/22/2535bd619c6e708a67dfc9b3186a438a', width: 728, height: 90 },
+  mobile: { key: '88eaef5f3df460d0fd1b62980d420199', src: 'https://bauval.org/22/88eaef5f3df460d0fd1b62980d420199', width: 320, height: 50 },
+};
