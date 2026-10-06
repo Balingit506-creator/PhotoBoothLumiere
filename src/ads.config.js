@@ -28,3 +28,9 @@ export const ADSTERRA_BANNER = {
   desktop: { key: '2535bd619c6e708a67dfc9b3186a438a', src: 'https://bauval.org/22/2535bd619c6e708a67dfc9b3186a438a', width: 728, height: 90 },
   mobile: { key: '88eaef5f3df460d0fd1b62980d420199', src: 'https://bauval.org/22/88eaef5f3df460d0fd1b62980d420199', width: 320, height: 50 },
 };
+
+/*
+ * Adsterra Smartlink: the link from your Adsterra dashboard. Shown as one small
+ * "Sponsored" line under the Download button. Leave it '' to turn it off.
+ */
+export const ADSTERRA_SMARTLINK = 'https://araplhn.org/4/3b7652a34e57aee9842c7d4142d9856f';

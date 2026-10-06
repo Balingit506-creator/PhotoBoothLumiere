@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { ADSTERRA_SMARTLINK } from '../ads.config.js';
+import { isAdFree } from '../lib/adfree.js';
 import { LAYOUTS, TEMPLATES } from '../lib/booth.js';
 import { loadImage } from '../lib/media.js';
 import { useArt, useToast } from '../context.js';
@@ -21,6 +23,14 @@ const canShareFiles = (() => {
   catch (e) { return false; }
 })();
 
+// Smartlink: only a plain https link counts.
+const SMARTLINK = (() => {
+  try {
+    const u = new URL(ADSTERRA_SMARTLINK.trim());
+    return u.protocol === 'https:' && u.pathname.length > 1 ? u.href : null;
+  } catch (e) { return null; }
+})();
+
 export default function DesignStep({ booth }) {
   const {
     layout, template, setTemplate, looked, look, setLook,
@@ -30,6 +40,7 @@ export default function DesignStep({ booth }) {
   const toast = useToast();
   const { placeholders } = useArt();
   const [cat, setCat] = useState('all');
+  const [adFree] = useState(isAdFree); // tippers turned ads off
 
   const L = LAYOUTS[layout];
   const wide = L.w > 600;
@@ -119,6 +130,12 @@ export default function DesignStep({ booth }) {
             </div>
             <p className="hint">{L.w} × {L.h} px · {wide ? '4×6' : '2×6'} in at 300 dpi</p>
             <p className="hint tip-nudge" hidden={!tipNudge}>Love your strip? <a href="#support">Buy the booth a coffee</a> ☕</p>
+            {SMARTLINK && !adFree && (
+              <p className="sponsored-link">
+                <span className="ad-label">Sponsored</span>
+                <a href={SMARTLINK} target="_blank" rel="nofollow sponsored noopener noreferrer">Explore an offer from our partners →</a>
+              </p>
+            )}
           </div>
         </aside>
       </div>

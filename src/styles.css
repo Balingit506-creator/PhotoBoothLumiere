@@ -501,6 +501,11 @@ kbd { font: 500 .72rem var(--sans); border: 1px solid var(--line); border-bottom
 .ad-slot { color: var(--ink-2); }
 .ad-label { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 12px; }
 .ad-label a { color: var(--gold); text-underline-offset: 3px; }
+/* the Smartlink under Download: one quiet, clearly labelled line */
+.sponsored-link { margin: 14px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: .85rem; color: var(--muted); }
+.sponsored-link .ad-label { margin: 0; text-align: left; }
+.sponsored-link a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+.sponsored-link a:hover { color: var(--gold); }
 .banner-ad { display: flex; justify-content: center; }
 .banner-ad iframe { display: block; max-width: 100%; border: 0; }
 .banner-ad-empty {
