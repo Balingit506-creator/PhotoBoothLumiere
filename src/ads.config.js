@@ -9,3 +9,10 @@ export const ADSTERRA_NATIVE = {
   src: 'https://bauval.org/21/17295f1b0dd18be6e916e1dc67402212',
   container: 'container-17295f1b0dd18be6e916e1dc67402212',
 };
+
+/*
+ * Adsterra Social Bar: paste the script's src from the code Adsterra gives you,
+ * e.g. '//pl12345678.example.com/ab/cd/ef/abcdef0123456789.js'.
+ * It loads once on every page view. Leave it '' to turn it off.
+ */
+export const ADSTERRA_SOCIAL_BAR = 'https://bauval.org/14/527e525e84541e63864c02dc23c5d6d1';

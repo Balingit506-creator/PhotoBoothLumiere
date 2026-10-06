@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { DONATE, PLATFORMS, WALLETS } from '../donate.config.js';
 import { useToast } from '../context.js';
 import WalletDialog from './WalletDialog.jsx';
+import PayPalCheckout from './PayPalCheckout.jsx';
+import { adFreeStatus, clearAdFree, daysFor, describeDays, formatDate, grantAdFree } from '../lib/adfree.js';
 
 const TIERS = [
   { amount: 3, icon: '☕', name: 'A coffee' },
@@ -9,10 +11,12 @@ const TIERS = [
   { amount: 10, icon: '🥂', name: 'A toast' },
 ];
 
-const configured = PLATFORMS.filter((p) => DONATE[p.key]);
-const primary = configured.find((p) => p.key === 'paypal') || configured[0];
+// With a Client ID, PayPal's own checkout confirms payment; otherwise PayPal.Me works on trust.
+const checkout = !!DONATE.paypalClientId;
+const configured = PLATFORMS.filter((p) => DONATE[p.key] && !(checkout && p.key === 'paypal'));
+const primary = checkout ? null : configured.find((p) => p.key === 'paypal') || configured[0];
 // Show every configured platform; before setup, show them all as a preview.
-const listed = configured.length ? configured : PLATFORMS.filter((p) => p.key !== 'stripe');
+const listed = configured.length || checkout ? configured : PLATFORMS.filter((p) => p.key !== 'stripe');
 const wallets = WALLETS.filter((w) => w.number || w.qr);
 
 export default function Support() {
@@ -21,6 +25,9 @@ export default function Support() {
   const [custom, setCustom] = useState('');
   const [selected, setSelected] = useState(5); // a tier amount, or 'custom'
   const [wallet, setWallet] = useState(null);
+  // Tips buy an ad-free pass. Unverified tips (PayPal.Me, GCash, Maya) ask "Sent your tip?" first.
+  const [pass] = useState(adFreeStatus);
+  const [pending, setPending] = useState(null); // ad-free days waiting on "Sent your tip?"
 
   const linkFor = (p) => p.url(DONATE[p.key], amount);
   const notReady = (e) => {
@@ -28,8 +35,19 @@ export default function Support() {
     toast('Donations are coming soon. Thank you for wanting to help!');
   };
   const linkProps = (p) => (p && DONATE[p.key]
-    ? { href: linkFor(p) }
+    ? { href: linkFor(p), onClick: () => setPending(daysFor(p.key === 'paypal' ? amount : 0)) }
     : { href: '#support', onClick: notReady });
+
+  const goAdFree = (days, verified) => {
+    const until = grantAdFree(days);
+    toast(`${verified ? 'Payment received. ' : ''}Thank you! Ad‑free until ${formatDate(until)} ✦`);
+    setTimeout(() => location.reload(), 1800);
+  };
+  const adsBackOn = () => {
+    clearAdFree();
+    toast('Ads are back on. Reloading…');
+    setTimeout(() => location.reload(), 1200);
+  };
 
   const pickTier = (amt) => { setAmount(amt); setCustom(''); setSelected(amt); };
   const onCustom = (e) => {
@@ -44,8 +62,9 @@ export default function Support() {
         <div className="support-copy">
           <p className="eyebrow">Support the booth</p>
           <h2>Keep the flash <em>firing</em></h2>
-          <p className="muted">Lumière Booth is free and never asks for your photos. If it made your day a little brighter, a small tip keeps it running, pays for new templates and keeps ads to a minimum.</p>
+          <p className="muted">Lumière Booth is free and never asks for your photos. If it made your day a little brighter, a small tip keeps it running and pays for new templates.</p>
           <ul className="support-perks">
+            <li>Every tip comes with an ad‑free pass ($1 = 5 days)</li>
             <li>New seasonal templates every few months</li>
             <li>No watermarks, no sign‑ups, ever</li>
             <li>Hosting and upkeep paid for by people like you</li>
@@ -72,22 +91,49 @@ export default function Support() {
             </label>
           </div>
 
-          <a className="btn btn-dark btn-block" target="_blank" rel="noopener" {...linkProps(primary)}>
-            {primary && primary.key !== 'paypal' ? `Donate on ${primary.name}` : `Donate $${amount}`}
-          </a>
-          <div className="donate-divider"><span>or support on</span></div>
+          {pass?.until ? (
+            <div className="adfree adfree-on" role="status">
+              <span>✦ Ad‑free until {formatDate(pass.until)}. Thank you!</span>
+              <button className="btn btn-link" type="button" onClick={adsBackOn}>Turn ads back on</button>
+            </div>
+          ) : (
+            <p className="adfree-note">
+              {pass?.ended ? 'Your ad‑free pass ended. ' : '✦ '}
+              A ${amount} tip = <strong>{describeDays(daysFor(amount))} ad‑free</strong>
+            </p>
+          )}
+
+          {checkout ? (
+            <PayPalCheckout amount={amount} onPaid={(paid) => goAdFree(daysFor(paid), true)}
+              onError={() => toast('PayPal hit a snag. No money was taken. Please try again.')}
+              fallback={<a className="btn btn-dark btn-block" target="_blank" rel="noopener"
+                href={PLATFORMS[0].url(DONATE.paypal, amount)} onClick={() => setPending(daysFor(amount))}>Donate ${amount}</a>} />
+          ) : (
+            <a className="btn btn-dark btn-block" target="_blank" rel="noopener" {...linkProps(primary)}>
+              {primary && primary.key !== 'paypal' ? `Donate on ${primary.name}` : `Donate $${amount}`}
+            </a>
+          )}
+          <div className="donate-divider"><span>{listed.length || wallets.length ? 'or support on' : ''}</span></div>
           <div className="donate-links">
             {listed.map((p) => (
               <a key={p.key} className="btn btn-ghost btn-sm" target="_blank" rel="noopener" {...linkProps(p)}>{p.name}</a>
             ))}
             {wallets.map((w) => (
               <button key={w.key} className="btn btn-ghost btn-sm wallet-btn" type="button" style={{ '--wallet': w.color }}
-                aria-haspopup="dialog" onClick={() => setWallet(w)}>
+                aria-haspopup="dialog" onClick={() => { setWallet(w); setPending(daysFor(0)); }}>
                 <span className="wallet-dot" aria-hidden="true"></span>{w.name}
               </button>
             ))}
           </div>
           <WalletDialog wallet={wallet} onClose={() => setWallet(null)} />
+          {pending && (
+            <div className="adfree adfree-ask" role="status">
+              <span>Sent your tip? Thank you 💛</span>
+              <button className="btn btn-dark btn-sm" type="button" onClick={() => { goAdFree(pending, false); setPending(null); }}>
+                Go ad‑free for {describeDays(pending)}
+              </button>
+            </div>
+          )}
           <p className="hint center">Payments are handled securely by the platform you choose. Lumière Booth never sees your card details.</p>
         </div>
       </div>

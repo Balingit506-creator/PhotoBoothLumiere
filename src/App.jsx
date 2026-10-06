@@ -9,6 +9,7 @@ import Gallery from './components/Gallery.jsx';
 import Booth from './components/Booth.jsx';
 import Features from './components/Features.jsx';
 import AdSlot from './components/AdSlot.jsx';
+import SocialBar from './components/SocialBar.jsx';
 import Gear from './components/Gear.jsx';
 import Support from './components/Support.jsx';
 import Faq from './components/Faq.jsx';
@@ -68,6 +69,7 @@ export default function App() {
           <Suggest />
         </main>
         <Footer />
+        <SocialBar />
         <div className={'toast' + (toastMsg.show ? ' show' : '')} role="status" aria-live="polite">{toastMsg.text}</div>
       </ArtContext.Provider>
     </ToastContext.Provider>

@@ -6,12 +6,16 @@
  *   buymeacoffee:  your BMC page name    (https://buymeacoffee.com/<name>)
  *   github:        your GitHub username  (https://github.com/sponsors/<name>)
  *   stripe:        a full Stripe Payment Link URL (https://buy.stripe.com/...)
+ *   paypalClientId: your PayPal app's Client ID (developer.paypal.com → Apps & Credentials,
+ *                   Live). When set, the big button becomes PayPal checkout, which confirms
+ *                   the payment and turns ads off automatically. Never paste the Secret here.
  * The big button uses PayPal when set (it can pre-fill the amount), otherwise
  * the first platform you filled in.
  */
 export const DONATE = {
   currency: 'USD',
   paypal: 'JuarenBalingit',
+  paypalClientId: 'BAAMdCniVNBuV0oYwJJPOLIAtTqyLiPVmOOMBAqwiqqWgz-WQpu2Y-mAGG8F8oiTnMg6AsZZLN9_juu0PQ',
   kofi: '',
   buymeacoffee: '',
   github: '',
@@ -39,3 +43,15 @@ export const PLATFORMS = [
   { key: 'github', name: 'GitHub Sponsors', url: (v) => `https://github.com/sponsors/${encodeURIComponent(v)}` },
   { key: 'stripe', name: 'Card (Stripe)', url: (v) => v },
 ];
+
+/*
+ * Ad-free passes: every tip turns ads off for a while, then they come back.
+ *   daysPerDollar:  ad-free days per $1 of a PayPal tip ($3 → 15 days).
+ *   maxDays:        the longest a pass can run.
+ *   walletDays:     days for a GCash or Maya tip (the site can't see the amount).
+ */
+export const AD_FREE = {
+  daysPerDollar: 5,
+  maxDays: 365,
+  walletDays: 5,
+};
