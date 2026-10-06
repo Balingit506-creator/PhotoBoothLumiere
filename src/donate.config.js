@@ -18,6 +18,20 @@ export const DONATE = {
   stripe: '',
 };
 
+/*
+ * GCash and Maya have no public pay links, so their buttons open a card with
+ * your QR code, account name and mobile number (with a copy button).
+ *   number:  the mobile number registered to the wallet, e.g. '0917 123 4567'
+ *   accountName: the account name as the app shows it, e.g. 'Juaren B.'
+ *   qr:      your "Receive money" QR image saved in public/donate/,
+ *            e.g. 'donate/gcash-qr.png' (no leading slash). Optional.
+ * A wallet appears on the site once its number or QR is filled in.
+ */
+export const WALLETS = [
+  { key: 'gcash', name: 'GCash', color: '#007dfe', number: '', accountName: 'Juaren B.', qr: 'donate/gcash-qr.png' },
+  { key: 'maya', name: 'Maya', color: '#00b14f', number: '', accountName: 'Juaren B.', qr: 'donate/maya-qr.png' },
+];
+
 export const PLATFORMS = [
   { key: 'paypal', name: 'PayPal', url: (v, amt) => `https://paypal.me/${encodeURIComponent(v)}/${amt}${DONATE.currency}` },
   { key: 'kofi', name: 'Ko‑fi', url: (v) => `https://ko-fi.com/${encodeURIComponent(v)}` },

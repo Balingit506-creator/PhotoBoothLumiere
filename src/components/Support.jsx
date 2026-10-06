@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { DONATE, PLATFORMS } from '../donate.config.js';
+import { DONATE, PLATFORMS, WALLETS } from '../donate.config.js';
 import { useToast } from '../context.js';
+import WalletDialog from './WalletDialog.jsx';
 
 const TIERS = [
   { amount: 3, icon: '☕', name: 'A coffee' },
@@ -12,12 +13,14 @@ const configured = PLATFORMS.filter((p) => DONATE[p.key]);
 const primary = configured.find((p) => p.key === 'paypal') || configured[0];
 // Show every configured platform; before setup, show them all as a preview.
 const listed = configured.length ? configured : PLATFORMS.filter((p) => p.key !== 'stripe');
+const wallets = WALLETS.filter((w) => w.number || w.qr);
 
 export default function Support() {
   const toast = useToast();
   const [amount, setAmount] = useState(5);
   const [custom, setCustom] = useState('');
   const [selected, setSelected] = useState(5); // a tier amount, or 'custom'
+  const [wallet, setWallet] = useState(null);
 
   const linkFor = (p) => p.url(DONATE[p.key], amount);
   const notReady = (e) => {
@@ -77,7 +80,14 @@ export default function Support() {
             {listed.map((p) => (
               <a key={p.key} className="btn btn-ghost btn-sm" target="_blank" rel="noopener" {...linkProps(p)}>{p.name}</a>
             ))}
+            {wallets.map((w) => (
+              <button key={w.key} className="btn btn-ghost btn-sm wallet-btn" type="button" style={{ '--wallet': w.color }}
+                aria-haspopup="dialog" onClick={() => setWallet(w)}>
+                <span className="wallet-dot" aria-hidden="true"></span>{w.name}
+              </button>
+            ))}
           </div>
+          <WalletDialog wallet={wallet} onClose={() => setWallet(null)} />
           <p className="hint center">Payments are handled securely by the platform you choose. Lumière Booth never sees your card details.</p>
         </div>
       </div>
